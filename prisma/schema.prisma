@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String
+  password  String
+  role      UserRole @default(CLIENT)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relacionamentos
+  exercises         Exercise[]
+  workoutExecutions WorkoutExecution[]
+
+  @@map("users")
+}
+
+model Exercise {
+  id           String   @id @default(cuid())
+  userId       String
+  name         String
+  muscleGroups Json // Array de grupos musculares
+  equipment    String?
+  instructions String?  @db.Text
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relacionamentos
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseExecutions ExerciseExecution[]
+
+  @@unique([userId, name])
+  @@map("exercises")
+}
+
+model WorkoutExecution {
+  id           String          @id @default(cuid())
+  userId       String
+  date         DateTime        @db.Date
+  dayOfWeek    String
+  muscleGroups Json // Array de grupos musculares
+  startTime    DateTime
+  endTime      DateTime?
+  status       ExecutionStatus @default(IN_PROGRESS)
+  notes        String?         @db.Text
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  // Relacionamentos
+  user               User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exerciseExecutions ExerciseExecution[]
+
+  @@unique([userId, date])
+  @@map("workout_executions")
+}
+
+model ExerciseExecution {
+  id                 String   @id @default(cuid())
+  workoutExecutionId String
+  exerciseId         String
+  exerciseName       String
+  order              Int
+  plannedSeries      Int
+  completedSeries    Int      @default(0)
+  isCompleted        Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  // Relacionamentos
+  workoutExecution WorkoutExecution  @relation(fields: [workoutExecutionId], references: [id], onDelete: Cascade)
+  exercise         Exercise          @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  seriesExecutions SeriesExecution[]
+
+  @@map("exercise_executions")
+}
+
+model SeriesExecution {
+  id                  String   @id @default(cuid())
+  exerciseExecutionId String
+  seriesNumber        Int
+  weight              Decimal  @db.Decimal(6, 2)
+  reps                Int
+  restTime            Int?
+  difficulty          Int?
+  notes               String?  @db.Text
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  // Relacionamentos
+  exerciseExecution ExerciseExecution @relation(fields: [exerciseExecutionId], references: [id], onDelete: Cascade)
+
+  @@unique([exerciseExecutionId, seriesNumber])
+  @@map("series_executions")
+}
+
+enum UserRole {
+  CLIENT
+  ADMIN
+}
+
+enum ExecutionStatus {
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
