@@ -1,165 +1,95 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ReportsService } from './reports.service';
-import { PrismaService } from '../database/prisma.service';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { User } from '../auth/user.interface';
 
 @Controller('reports')
 export class ReportsController {
-  constructor(
-    private readonly reportsService: ReportsService,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly reportsService: ReportsService) {}
 
-  // Relatório geral de treinos
   @Get('overview')
   async getWorkoutOverview(
+    @CurrentUser() user: User,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
     return this.reportsService.getWorkoutOverview(user.id, startDate, endDate);
   }
 
-  // Relatório de progresso por exercício
   @Get('exercise-progress')
   async getExerciseProgress(
+    @CurrentUser() user: User,
     @Query('exerciseId') exerciseId?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
-    return this.reportsService.getExerciseProgress(
-      user.id,
-      exerciseId,
-      startDate,
-      endDate,
-    );
+    return this.reportsService.getExerciseProgress(user.id, exerciseId, startDate, endDate);
   }
 
-  // Relatório de frequência de treinos
   @Get('frequency')
   async getWorkoutFrequency(
+    @CurrentUser() user: User,
     @Query('period') period: 'week' | 'month' | 'year' = 'month',
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
-    return this.reportsService.getWorkoutFrequency(
-      user.id,
-      period,
-      startDate,
-      endDate,
-    );
+    return this.reportsService.getWorkoutFrequency(user.id, period, startDate, endDate);
   }
 
-  // Relatório por grupo muscular
   @Get('muscle-groups')
   async getMuscleGroupAnalysis(
+    @CurrentUser() user: User,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
-    return this.reportsService.getMuscleGroupAnalysis(
-      user.id,
-      startDate,
-      endDate,
-    );
+    return this.reportsService.getMuscleGroupAnalysis(user.id, startDate, endDate);
   }
 
-  // Relatório de volume de treino (peso x repetições)
   @Get('volume')
   async getVolumeAnalysis(
+    @CurrentUser() user: User,
     @Query('exerciseId') exerciseId?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
-    return this.reportsService.getVolumeAnalysis(
-      user.id,
-      exerciseId,
-      startDate,
-      endDate,
-    );
+    return this.reportsService.getVolumeAnalysis(user.id, exerciseId, startDate, endDate);
   }
 
-  // Relatório de recordes pessoais
   @Get('personal-records')
   async getPersonalRecords(
+    @CurrentUser() user: User,
     @Query('exerciseId') exerciseId?: string,
     @Query('type') type: 'weight' | 'reps' | 'volume' = 'weight',
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
     return this.reportsService.getPersonalRecords(user.id, exerciseId, type);
   }
 
-  // Relatório de duração dos treinos
   @Get('duration')
   async getWorkoutDuration(
+    @CurrentUser() user: User,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
     return this.reportsService.getWorkoutDuration(user.id, startDate, endDate);
   }
 
-  // Relatório de consistência (dias da semana mais ativos)
   @Get('consistency')
   async getWorkoutConsistency(
+    @CurrentUser() user: User,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
-    return this.reportsService.getWorkoutConsistency(
-      user.id,
-      startDate,
-      endDate,
-    );
+    return this.reportsService.getWorkoutConsistency(user.id, startDate, endDate);
   }
 
-  // Relatório de evolução de peso e repetições (NOVO)
   @Get('evolution')
   async getWeightRepsEvolution(
+    @CurrentUser() user: User,
     @Query('exerciseId') exerciseId: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     @Query('seriesType') seriesType: 'max' | 'average' | 'all' = 'max',
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
     if (!exerciseId) {
       throw new Error('exerciseId é obrigatório para análise de evolução');
     }
@@ -173,70 +103,39 @@ export class ReportsController {
     );
   }
 
-  // Comparar múltiplos exercícios
   @Get('compare-exercises')
   async compareExercises(
-    @Query('exerciseIds') exerciseIds: string, // IDs separados por vírgula
+    @CurrentUser() user: User,
+    @Query('exerciseIds') exerciseIds: string,
     @Query('metric') metric: 'weight' | 'reps' | 'volume' = 'weight',
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
     const ids = exerciseIds.split(',').filter(id => id.trim());
     if (ids.length === 0) {
       throw new Error('Pelo menos um exerciseId deve ser fornecido');
     }
 
-    return this.reportsService.compareExercises(
-      user.id,
-      ids,
-      metric,
-      startDate,
-      endDate,
-    );
+    return this.reportsService.compareExercises(user.id, ids, metric, startDate, endDate);
   }
 
-  // Análise de força (peso máximo por repetições)
   @Get('strength-analysis')
   async getStrengthAnalysis(
+    @CurrentUser() user: User,
     @Query('exerciseId') exerciseId?: string,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
-    return this.reportsService.getStrengthAnalysis(
-      user.id,
-      exerciseId,
-      startDate,
-      endDate,
-    );
+    return this.reportsService.getStrengthAnalysis(user.id, exerciseId, startDate, endDate);
   }
 
-  // Relatório completo em PDF/JSON
   @Get('complete')
   async getCompleteReport(
+    @CurrentUser() user: User,
     @Query('format') format: 'json' | 'summary' = 'summary',
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
-    return this.reportsService.getCompleteReport(
-      user.id,
-      format,
-      startDate,
-      endDate,
-    );
+    return this.reportsService.getCompleteReport(user.id, format, startDate, endDate);
   }
 }

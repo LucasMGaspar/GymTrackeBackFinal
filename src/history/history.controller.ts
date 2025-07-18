@@ -1,17 +1,25 @@
-import { Controller, Get, Query, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Param,
+  Delete,
+  UseGuards,
+} from '@nestjs/common';
 import { HistoryService } from './history.service';
-import { PrismaService } from '../database/prisma.service';
+import { CurrentUser }    from '../auth/current-user.decorator';
+import { User }           from '../auth/user.interface';
+import { JwtAuthGuard }   from '../auth/jwt.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('history')
 export class HistoryController {
-  constructor(
-    private readonly historyService: HistoryService,
-    private readonly prisma: PrismaService,
-  ) {}
+  constructor(private readonly historyService: HistoryService) {}
 
   // Listar histórico de treinos com filtros e paginação
   @Get()
   async getWorkoutHistory(
+    @CurrentUser() user: User,
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
     @Query('status') status?: string,
@@ -20,14 +28,9 @@ export class HistoryController {
     @Query('muscleGroup') muscleGroup?: string,
     @Query('search') search?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
     return this.historyService.getWorkoutHistory(user.id, {
-      page: parseInt(page),
-      limit: parseInt(limit),
+      page: parseInt(page, 10),
+      limit: parseInt(limit, 10),
       status,
       startDate,
       endDate,
@@ -36,79 +39,61 @@ export class HistoryController {
     });
   }
 
-  // Detalhes de um treino específico
-  @Get(':id')
-  async getWorkoutDetails(@Param('id') workoutId: string) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
-    return this.historyService.getWorkoutDetails(user.id, workoutId);
-  }
-
-  // Estatísticas do histórico
+  // Estatísticas gerais do histórico
   @Get('stats/overview')
   async getHistoryStats(
+    @CurrentUser() user: User,
     @Query('period') period: 'week' | 'month' | 'year' | 'all' = 'month',
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
     return this.historyService.getHistoryStats(user.id, period, startDate, endDate);
   }
 
-  // Deletar treino do histórico
-  @Delete(':id')
-  async deleteWorkout(@Param('id') workoutId: string) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
-    return this.historyService.deleteWorkout(user.id, workoutId);
-  }
-
-  // Treinos por dia da semana
+  // Padrão semanal de treinos
   @Get('stats/weekly-pattern')
   async getWeeklyPattern(
+    @CurrentUser() user: User,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
     return this.historyService.getWeeklyPattern(user.id, startDate, endDate);
   }
 
-  // Grupos musculares mais treinados
+  // Top grupos musculares
   @Get('stats/muscle-groups')
   async getMuscleGroupStats(
+    @CurrentUser() user: User,
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
   ) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
-
     return this.historyService.getMuscleGroupStats(user.id, startDate, endDate);
   }
 
-  // Duplicar treino (criar novo baseado em um existente)
-  @Get(':id/duplicate')
-  async duplicateWorkout(@Param('id') workoutId: string) {
-    const user = await this.prisma.user.findFirst();
-    if (!user) {
-      throw new Error('Nenhum usuário encontrado');
-    }
+  // Detalhes completos de um treino
+  @Get(':id')
+  async getWorkoutDetails(
+    @CurrentUser() user: User,
+    @Param('id') workoutId: string,
+  ) {
+    return this.historyService.getWorkoutDetails(user.id, workoutId);
+  }
 
+  // Duplicar treino
+  @Get(':id/duplicate')
+  async duplicateWorkout(
+    @CurrentUser() user: User,
+    @Param('id') workoutId: string,
+  ) {
     return this.historyService.duplicateWorkout(user.id, workoutId);
+  }
+
+  // Deletar treino
+  @Delete(':id')
+  async deleteWorkout(
+    @CurrentUser() user: User,
+    @Param('id') workoutId: string,
+  ) {
+    return this.historyService.deleteWorkout(user.id, workoutId);
   }
 }
