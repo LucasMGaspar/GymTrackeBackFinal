@@ -97,7 +97,7 @@ export class WorkoutExecutionsService {
     }
 
     // IMPORTANTE: Criar execuções dos exercícios na ORDEM EXATA do array exerciseIds
-    const exerciseExecutions = [];
+    const exerciseExecutions: any[] = [];
     
     for (let index = 0; index < dto.exerciseIds.length; index++) {
       const exerciseId = dto.exerciseIds[index];
