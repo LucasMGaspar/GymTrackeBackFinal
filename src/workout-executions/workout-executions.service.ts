@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+// src/workout-executions/workout-executions.service.ts
 import {
   Injectable,
   NotFoundException,
@@ -59,9 +58,10 @@ export class WorkoutExecutionsService {
     const muscleGroups = workout.muscleGroups as string[];
 
     // Buscar exercícios que contenham pelo menos um dos grupos musculares
+    // REMOVIDA a ordenação alfabética para não influenciar a ordem de seleção
     const exercises = await this.prisma.exercise.findMany({
       where: { userId },
-      orderBy: { name: 'asc' },
+      // Removido: orderBy: { name: 'asc' },
     });
 
     return exercises.filter((exercise) => {
@@ -96,28 +96,29 @@ export class WorkoutExecutionsService {
       throw new BadRequestException('Alguns exercícios não foram encontrados');
     }
 
-    // Criar execuções dos exercícios
-    const exerciseExecutions = await Promise.all(
-      dto.exerciseIds.map(async (exerciseId, index) => {
-        const exercise = exercises.find((e) => e.id === exerciseId);
+    // IMPORTANTE: Criar execuções dos exercícios na ORDEM EXATA do array exerciseIds
+    const exerciseExecutions = [];
+    
+    for (let index = 0; index < dto.exerciseIds.length; index++) {
+      const exerciseId = dto.exerciseIds[index];
+      const exercise = exercises.find((e) => e.id === exerciseId);
 
-        if (!exercise) {
-          throw new BadRequestException(
-            `Exercício ${exerciseId} não encontrado`,
-          );
-        }
+      if (!exercise) {
+        throw new BadRequestException(`Exercício ${exerciseId} não encontrado`);
+      }
 
-        return this.prisma.exerciseExecution.create({
-          data: {
-            workoutExecutionId: workoutId,
-            exerciseId,
-            exerciseName: exercise.name,
-            order: index + 1,
-            plannedSeries: 0,
-          },
-        });
-      }),
-    );
+      const exerciseExecution = await this.prisma.exerciseExecution.create({
+        data: {
+          workoutExecutionId: workoutId,
+          exerciseId,
+          exerciseName: exercise.name,
+          order: index + 1, // CRÍTICO: ordem baseada no index do array
+          plannedSeries: 0,
+        },
+      });
+      
+      exerciseExecutions.push(exerciseExecution);
+    }
 
     return exerciseExecutions;
   }
@@ -291,7 +292,7 @@ export class WorkoutExecutionsService {
               orderBy: { seriesNumber: 'asc' },
             },
           },
-          orderBy: { order: 'asc' },
+          orderBy: { order: 'asc' }, // MANTÉM a ordenação por order (que é a ordem de seleção)
         },
       },
     });
@@ -306,6 +307,7 @@ export class WorkoutExecutionsService {
           include: {
             exercise: true,
           },
+          orderBy: { order: 'asc' }, // GARANTE que os exercícios sejam listados na ordem de seleção
         },
       },
       orderBy: { date: 'desc' },
