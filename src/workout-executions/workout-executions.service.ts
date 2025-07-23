@@ -33,14 +33,15 @@ export class WorkoutExecutionsService {
 
   // 1. Iniciar novo treino
   async startWorkout(userId: string, dto: StartWorkoutDto) {
-    // Criar data no fuso horário brasileiro
-    const today = this.getBrasiliaDate();
+    // Usar startTime como base para extrair a data (garantir consistência)
+    const startTime = new Date();
+    const workoutDate = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate());
     
     // Verificar se já tem treino hoje
     const existingWorkout = await this.prisma.workoutExecution.findFirst({
       where: {
         userId,
-        date: today,
+        date: workoutDate,
       },
     });
 
@@ -48,16 +49,16 @@ export class WorkoutExecutionsService {
       throw new BadRequestException('Já existe um treino para hoje');
     }
 
-    // Usar a mesma data base para o dia da semana
-    const dayOfWeek = this.getBrasiliaDayOfWeek(today);
+    // Calcular dia da semana baseado na mesma data
+    const dayOfWeek = this.getBrasiliaDayOfWeek(workoutDate);
 
     return this.prisma.workoutExecution.create({
       data: {
         userId,
-        date: today,
+        date: workoutDate, // Usar data extraída do startTime
         dayOfWeek,
         muscleGroups: dto.muscleGroups,
-        startTime: new Date(), // Manter o horário real para startTime
+        startTime: startTime, // Usar o mesmo startTime
         status: 'IN_PROGRESS',
         notes: dto.notes,
       },
