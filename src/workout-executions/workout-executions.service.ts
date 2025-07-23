@@ -15,10 +15,11 @@ export class WorkoutExecutionsService {
 
   // Método auxiliar para obter data no fuso horário brasileiro
   private getBrasiliaDate(): Date {
-    // Abordagem mais simples: usar a data local atual
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    return today;
+    // Usar a mesma lógica do startTime - só extrair a data
+    const now = new Date(); // Mesmo que startTime usa
+    
+    // Extrair apenas ano/mês/dia (sem conversão de fuso)
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
   }
 
   // Método auxiliar para obter dia da semana no fuso horário brasileiro
