@@ -19,9 +19,9 @@ export class HistoryService {
   // Método auxiliar para obter data no fuso horário brasileiro
   private getBrasiliaDate(): Date {
     const now = new Date();
-    const brasiliaDate = new Date(now.toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
-    brasiliaDate.setHours(0, 0, 0, 0);
-    return brasiliaDate;
+    // Obter apenas a data (sem horário) no fuso brasileiro
+    const brasiliaDateStr = now.toLocaleDateString('en-CA', {timeZone: 'America/Sao_Paulo'}); // formato YYYY-MM-DD
+    return new Date(brasiliaDateStr + 'T00:00:00.000Z');
   }
 
   // Método auxiliar para obter dia da semana no fuso horário brasileiro
