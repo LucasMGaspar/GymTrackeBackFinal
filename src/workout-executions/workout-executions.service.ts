@@ -13,11 +13,27 @@ import { RegisterSeriesDto } from './dto/register-series.dto';
 export class WorkoutExecutionsService {
   constructor(private prisma: PrismaService) {}
 
+  // Método auxiliar para obter data no fuso horário brasileiro
+  private getBrasiliaDate(): Date {
+    const now = new Date();
+    const brasiliaDate = new Date(now.toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+    brasiliaDate.setHours(0, 0, 0, 0);
+    return brasiliaDate;
+  }
+
+  // Método auxiliar para obter dia da semana no fuso horário brasileiro
+  private getBrasiliaDayOfWeek(date: Date): string {
+    return date.toLocaleDateString('pt-BR', { 
+      weekday: 'long',
+      timeZone: 'America/Sao_Paulo' 
+    });
+  }
+
   // 1. Iniciar novo treino
   async startWorkout(userId: string, dto: StartWorkoutDto) {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
+    // Criar data no fuso horário brasileiro
+    const today = this.getBrasiliaDate();
+    
     // Verificar se já tem treino hoje
     const existingWorkout = await this.prisma.workoutExecution.findFirst({
       where: {
@@ -30,15 +46,16 @@ export class WorkoutExecutionsService {
       throw new BadRequestException('Já existe um treino para hoje');
     }
 
-    const dayOfWeek = today.toLocaleDateString('pt-BR', { weekday: 'long' });
+    // Usar a mesma data base para o dia da semana
+    const dayOfWeek = this.getBrasiliaDayOfWeek(today);
 
     return this.prisma.workoutExecution.create({
       data: {
         userId,
-        date: today,
+        date: today, // Usar a data corrigida para fuso horário brasileiro
         dayOfWeek,
         muscleGroups: dto.muscleGroups,
-        startTime: new Date(),
+        startTime: new Date(), // Manter o horário real para startTime
         status: 'IN_PROGRESS',
         notes: dto.notes,
       },
