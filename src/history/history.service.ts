@@ -16,24 +16,6 @@ interface HistoryFilters {
 export class HistoryService {
   constructor(private prisma: PrismaService) {}
 
-  // Método auxiliar para obter data no fuso horário brasileiro
-  private getBrasiliaDate(): Date {
-    // Usar a mesma lógica do startTime - só extrair a data
-    const now = new Date(); // Mesmo que startTime usa
-    
-    // Extrair apenas ano/mês/dia (sem conversão de fuso)
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  }
-
-  // Método auxiliar para obter dia da semana no fuso horário brasileiro
-  private getBrasiliaDayOfWeek(date: Date): string {
-    const daysOfWeek = [
-      'domingo', 'segunda-feira', 'terça-feira', 'quarta-feira',
-      'quinta-feira', 'sexta-feira', 'sábado'
-    ];
-    return daysOfWeek[date.getDay()];
-  }
-
   // Listar histórico de treinos com filtros e paginação
   async getWorkoutHistory(userId: string, filters: HistoryFilters) {
     const { page, limit, status, startDate, endDate, search } = filters;
@@ -424,7 +406,7 @@ export class HistoryService {
     return { message: 'Treino deletado com sucesso' };
   }
 
-  // Duplicar treino - VERSÃO CORRIGIDA
+  // ✅ MÉTODO CORRIGIDO: Duplicar treino com data correta
   async duplicateWorkout(userId: string, workoutId: string) {
     const originalWorkout = await this.prisma.workoutExecution.findFirst({
       where: { id: workoutId, userId },
@@ -441,8 +423,8 @@ export class HistoryService {
       throw new NotFoundException('Treino não encontrado');
     }
 
-    // Usar o método auxiliar para obter data no fuso brasileiro
-    const today = this.getBrasiliaDate();
+    // ✅ CORREÇÃO: Usar toDateString() para evitar problema de fuso horário
+    const today = new Date(new Date().toDateString()); // <- LINHA CORRIGIDA!
 
     // Verificar se já tem treino hoje
     const existingWorkout = await this.prisma.workoutExecution.findFirst({
@@ -453,8 +435,12 @@ export class HistoryService {
       throw new BadRequestException('Já existe um treino para hoje');
     }
 
-    // Usar o método auxiliar para obter dia da semana
-    const dayOfWeek = this.getBrasiliaDayOfWeek(today);
+    // Calcular dia da semana
+    const daysOfWeek = [
+      'domingo', 'segunda-feira', 'terça-feira', 'quarta-feira',
+      'quinta-feira', 'sexta-feira', 'sábado'
+    ];
+    const dayOfWeek = daysOfWeek[today.getDay()];
 
     // Processar muscleGroups corretamente para o tipo do Prisma
     let muscleGroupsData: Prisma.InputJsonValue = [];
@@ -469,10 +455,10 @@ export class HistoryService {
     const newWorkout = await this.prisma.workoutExecution.create({
       data: {
         userId,
-        date: today,
+        date: today, // Data correta
         dayOfWeek,
         muscleGroups: muscleGroupsData,
-        startTime: new Date(),
+        startTime: new Date(), // startTime continua igual (UTC)
         status: 'IN_PROGRESS',
         notes: `Baseado no treino de ${new Date(originalWorkout.date).toLocaleDateString('pt-BR')}`,
       },
