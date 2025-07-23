@@ -15,18 +15,19 @@ export class WorkoutExecutionsService {
 
   // Método auxiliar para obter data no fuso horário brasileiro
   private getBrasiliaDate(): Date {
+    // Abordagem mais simples: usar a data local atual
     const now = new Date();
-    // Obter apenas a data (sem horário) no fuso brasileiro
-    const brasiliaDateStr = now.toLocaleDateString('en-CA', {timeZone: 'America/Sao_Paulo'}); // formato YYYY-MM-DD
-    return new Date(brasiliaDateStr + 'T00:00:00.000Z');
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return today;
   }
 
   // Método auxiliar para obter dia da semana no fuso horário brasileiro
   private getBrasiliaDayOfWeek(date: Date): string {
-    return date.toLocaleDateString('pt-BR', { 
-      weekday: 'long',
-      timeZone: 'America/Sao_Paulo' 
-    });
+    const daysOfWeek = [
+      'domingo', 'segunda-feira', 'terça-feira', 'quarta-feira',
+      'quinta-feira', 'sexta-feira', 'sábado'
+    ];
+    return daysOfWeek[date.getDay()];
   }
 
   // 1. Iniciar novo treino
@@ -52,7 +53,7 @@ export class WorkoutExecutionsService {
     return this.prisma.workoutExecution.create({
       data: {
         userId,
-        date: today, // Usar a data corrigida para fuso horário brasileiro
+        date: today,
         dayOfWeek,
         muscleGroups: dto.muscleGroups,
         startTime: new Date(), // Manter o horário real para startTime
