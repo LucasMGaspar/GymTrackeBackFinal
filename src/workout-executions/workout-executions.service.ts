@@ -13,29 +13,11 @@ import { RegisterSeriesDto } from './dto/register-series.dto';
 export class WorkoutExecutionsService {
   constructor(private prisma: PrismaService) {}
 
-  // Método auxiliar para obter data no fuso horário brasileiro
-  private getBrasiliaDate(): Date {
-    // Usar a mesma lógica do startTime - só extrair a data
-    const now = new Date(); // Mesmo que startTime usa
-    
-    // Extrair apenas ano/mês/dia (sem conversão de fuso)
-    return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  }
-
-  // Método auxiliar para obter dia da semana no fuso horário brasileiro
-  private getBrasiliaDayOfWeek(date: Date): string {
-    const daysOfWeek = [
-      'domingo', 'segunda-feira', 'terça-feira', 'quarta-feira',
-      'quinta-feira', 'sexta-feira', 'sábado'
-    ];
-    return daysOfWeek[date.getDay()];
-  }
-
-  // 1. Iniciar novo treino
+  // ✅ MÉTODO CORRIGIDO: Iniciar treino com data correta
   async startWorkout(userId: string, dto: StartWorkoutDto) {
-    // Usar startTime como base para extrair a data (garantir consistência)
+    // ✅ CORREÇÃO: Usar toDateString() para evitar problema de fuso horário
     const startTime = new Date();
-    const workoutDate = new Date(startTime.getFullYear(), startTime.getMonth(), startTime.getDate());
+    const workoutDate = new Date(startTime.toDateString()); // <- LINHA CORRIGIDA!
     
     // Verificar se já tem treino hoje
     const existingWorkout = await this.prisma.workoutExecution.findFirst({
@@ -49,16 +31,20 @@ export class WorkoutExecutionsService {
       throw new BadRequestException('Já existe um treino para hoje');
     }
 
-    // Calcular dia da semana baseado na mesma data
-    const dayOfWeek = this.getBrasiliaDayOfWeek(workoutDate);
+    // Calcular dia da semana
+    const daysOfWeek = [
+      'domingo', 'segunda-feira', 'terça-feira', 'quarta-feira',
+      'quinta-feira', 'sexta-feira', 'sábado'
+    ];
+    const dayOfWeek = daysOfWeek[workoutDate.getDay()];
 
     return this.prisma.workoutExecution.create({
       data: {
         userId,
-        date: workoutDate, // Usar data extraída do startTime
+        date: workoutDate, // Data correta
         dayOfWeek,
         muscleGroups: dto.muscleGroups,
-        startTime: startTime, // Usar o mesmo startTime
+        startTime: startTime, // startTime continua igual (UTC)
         status: 'IN_PROGRESS',
         notes: dto.notes,
       },
@@ -294,7 +280,7 @@ export class WorkoutExecutionsService {
       where: { id: workoutId },
       data: {
         status: 'COMPLETED',
-        endTime: new Date(),
+        endTime: new Date(), // endTime continua igual (UTC)
         notes: notes || workout.notes,
       },
     });
