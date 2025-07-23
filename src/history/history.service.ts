@@ -16,6 +16,22 @@ interface HistoryFilters {
 export class HistoryService {
   constructor(private prisma: PrismaService) {}
 
+  // Método auxiliar para obter data no fuso horário brasileiro
+  private getBrasiliaDate(): Date {
+    const now = new Date();
+    const brasiliaDate = new Date(now.toLocaleString("en-US", {timeZone: "America/Sao_Paulo"}));
+    brasiliaDate.setHours(0, 0, 0, 0);
+    return brasiliaDate;
+  }
+
+  // Método auxiliar para obter dia da semana no fuso horário brasileiro
+  private getBrasiliaDayOfWeek(date: Date): string {
+    return date.toLocaleDateString('pt-BR', { 
+      weekday: 'long',
+      timeZone: 'America/Sao_Paulo' 
+    });
+  }
+
   // Listar histórico de treinos com filtros e paginação
   async getWorkoutHistory(userId: string, filters: HistoryFilters) {
     const { page, limit, status, startDate, endDate, search } = filters;
@@ -423,8 +439,8 @@ export class HistoryService {
       throw new NotFoundException('Treino não encontrado');
     }
 
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Usar o método auxiliar para obter data no fuso brasileiro
+    const today = this.getBrasiliaDate();
 
     // Verificar se já tem treino hoje
     const existingWorkout = await this.prisma.workoutExecution.findFirst({
@@ -435,7 +451,8 @@ export class HistoryService {
       throw new BadRequestException('Já existe um treino para hoje');
     }
 
-    const dayOfWeek = today.toLocaleDateString('pt-BR', { weekday: 'long' });
+    // Usar o método auxiliar para obter dia da semana
+    const dayOfWeek = this.getBrasiliaDayOfWeek(today);
 
     // Processar muscleGroups corretamente para o tipo do Prisma
     let muscleGroupsData: Prisma.InputJsonValue = [];
