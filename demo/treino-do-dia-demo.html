@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Demo - Treino do Dia | Personal Trainer SaaS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Top Navigation -->
+    <nav class="bg-white border-b border-gray-200 px-4 py-3 sticky top-0 z-10">
+        <div class="flex items-center justify-between max-w-7xl mx-auto">
+            <div>
+                <h1 class="text-xl font-bold text-gray-900">Meus Treinos</h1>
+                <p class="text-sm text-gray-500">Maria Aluna</p>
+            </div>
+            <button class="text-sm text-gray-600 hover:text-gray-900 px-3 py-1 rounded hover:bg-gray-100 transition">
+                Sair
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="space-y-6">
+            <!-- Header Card -->
+            <div class="bg-white rounded-lg shadow-sm p-6">
+                <div class="flex items-start justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-900 mb-1">
+                            Treino A - Peito/Bíceps
+                        </h2>
+                        <p class="text-sm text-gray-600 capitalize">
+                            segunda-feira, 19 de dezembro de 2025
+                        </p>
+                        <p class="text-sm text-gray-600 mt-2">
+                            Foco em hipertrofia
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="flex gap-2">
+                <button class="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition text-sm font-medium">
+                    📋 Copiar última sessão
+                </button>
+                <button class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 py-2 px-4 rounded-lg transition text-sm font-medium">
+                    💾 Salvar progresso
+                </button>
+            </div>
+
+            <!-- Exercises List -->
+            <div class="space-y-3">
+                <!-- Exercise 1 -->
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <div class="mb-3">
+                        <h3 class="font-semibold text-gray-900">Supino Reto</h3>
+                        <p class="text-xs text-gray-500">Peito</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Séries</label>
+                            <input 
+                                type="number" 
+                                value="4"
+                                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Reps</label>
+                            <input 
+                                type="text" 
+                                value="12/10/8/8"
+                                placeholder="10/10/8"
+                                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Carga (kg)</label>
+                            <input 
+                                type="number" 
+                                value="60"
+                                placeholder="20"
+                                step="0.5"
+                                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercise 2 -->
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <div class="mb-3">
+                        <h3 class="font-semibold text-gray-900">Rosca Direta com Barra</h3>
+                        <p class="text-xs text-gray-500">Bíceps</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Séries</label>
+                            <input 
+                                type="number" 
+                                value="3"
+                                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Reps</label>
+                            <input 
+                                type="text" 
+                                value="12/12/10"
+                                placeholder="10/10/8"
+                                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Carga (kg)</label>
+                            <input 
+                                type="number" 
+                                value="30"
+                                placeholder="20"
+                                step="0.5"
+                                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Exercise 3 -->
+                <div class="bg-white rounded-lg shadow-sm p-4">
+                    <div class="mb-3">
+                        <h3 class="font-semibold text-gray-900">Crucifixo Inclinado</h3>
+                        <p class="text-xs text-gray-500">Peito</p>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Séries</label>
+                            <input 
+                                type="number" 
+                                value="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Reps</label>
+                            <input 
+                                type="text" 
+                                value=""
+                                placeholder="10/10/8"
+                                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            />
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Carga (kg)</label>
+                            <input 
+                                type="number" 
+                                value=""
+                                placeholder="20"
+                                step="0.5"
+                                class="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Complete Button -->
+            <button class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition">
+                ✓ Concluir Treino
+            </button>
+        </div>
+    </main>
+
+    <!-- Demo Info Banner -->
+    <div class="fixed bottom-4 left-4 right-4 bg-blue-600 text-white p-4 rounded-lg shadow-lg max-w-md mx-auto">
+        <p class="text-sm font-semibold mb-1">📱 Demo - Treino do Dia</p>
+        <p class="text-xs opacity-90">
+            Esta é uma prévia estática da interface. A versão real é interativa e salva os dados no Supabase.
+        </p>
+    </div>
+
+    <script>
+        // Simple interactions for demo
+        document.querySelectorAll('button').forEach(btn => {
+            if (btn.textContent.includes('Concluir')) {
+                btn.addEventListener('click', () => {
+                    alert('💪 Treino concluído! Parabéns!\n\n(Esta é uma demo estática)');
+                });
+            } else if (btn.textContent.includes('Copiar')) {
+                btn.addEventListener('click', () => {
+                    alert('📋 Dados da última sessão copiados!\n\n(Esta é uma demo estática)');
+                });
+            } else if (btn.textContent.includes('Salvar')) {
+                btn.addEventListener('click', () => {
+                    alert('💾 Progresso salvo com sucesso!\n\n(Esta é uma demo estática)');
+                });
+            }
+        });
+
+        // Add some visual feedback
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', (e) => {
+                e.target.parentElement.classList.add('scale-105', 'transition-transform');
+            });
+            input.addEventListener('blur', (e) => {
+                e.target.parentElement.classList.remove('scale-105');
+            });
+        });
+    </script>
+</body>
+</html>
