@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { TopNav } from '@/components/TopNav';
+import { AppLayout } from '@/components/AppLayout';
 
 export default async function StudentLayout({
   children,
@@ -24,15 +24,8 @@ export default async function StudentLayout({
     .single();
 
   if (!profile || profile.role !== 'student') {
-    redirect('/login');
+    redirect('/app/personal');
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <TopNav profile={profile} title="Meus Treinos" />
-      <main className="max-w-7xl mx-auto px-4 py-6">
-        {children}
-      </main>
-    </div>
-  );
+  return <AppLayout profile={profile}>{children}</AppLayout>;
 }
