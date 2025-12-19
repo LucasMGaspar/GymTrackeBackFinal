@@ -72,7 +72,9 @@ async function getOrCreateTodayWorkout(userId: string) {
     .from('workout_sessions')
     .insert({
       student_user_id: userId,
+      student_id: studentRecord.id,
       template_id: template.id,
+      template_name: template.name,
       session_date: today,
       status: 'in_progress',
     })
@@ -91,9 +93,11 @@ async function getOrCreateTodayWorkout(userId: string) {
       session_id: newSession.id,
       exercise_id: te.exercise_id,
       sort_order: te.sort_order,
-      sets_done: 0,
-      reps_done: '',
-      load: null,
+      target_sets: te.target_sets,
+      target_reps: te.target_reps,
+      actual_sets: 0,
+      actual_reps: '',
+      actual_load: null,
       notes: null,
     }));
 

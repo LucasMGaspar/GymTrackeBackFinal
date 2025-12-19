@@ -15,7 +15,7 @@ export function TodayWorkoutClient({ session, exercises: initialExercises }: Pro
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
 
-  const updateExercise = (id: string, field: 'sets_done' | 'reps_done' | 'load', value: any) => {
+  const updateExercise = (id: string, field: 'actual_sets' | 'actual_reps' | 'actual_load', value: any) => {
     setExercises(prev =>
       prev.map(ex =>
         ex.id === id ? { ...ex, [field]: value } : ex
@@ -88,7 +88,7 @@ export function TodayWorkoutClient({ session, exercises: initialExercises }: Pro
     }
   };
 
-  const isCompleted = session.status === 'done';
+  const isCompleted = session.status === 'completed';
   const todayDate = new Date().toLocaleDateString('pt-BR', { 
     weekday: 'long', 
     year: 'numeric', 
@@ -154,16 +154,16 @@ export function TodayWorkoutClient({ session, exercises: initialExercises }: Pro
                 <div className="grid grid-cols-3 gap-3 text-sm">
                   <div>
                     <span className="text-gray-600">Séries:</span>
-                    <span className="ml-2 font-semibold">{ex.sets_done}</span>
+                    <span className="ml-2 font-semibold">{ex.actual_sets}</span>
                   </div>
                   <div>
                     <span className="text-gray-600">Reps:</span>
-                    <span className="ml-2 font-semibold">{ex.reps_done || '-'}</span>
+                    <span className="ml-2 font-semibold">{ex.actual_reps || '-'}</span>
                   </div>
                   <div>
                     <span className="text-gray-600">Carga:</span>
                     <span className="ml-2 font-semibold">
-                      {ex.load ? `${ex.load}kg` : '-'}
+                      {ex.actual_load ? `${ex.actual_load}kg` : '-'}
                     </span>
                   </div>
                 </div>
@@ -174,8 +174,8 @@ export function TodayWorkoutClient({ session, exercises: initialExercises }: Pro
                   <label className="block text-xs text-gray-600 mb-1">Séries</label>
                   <input
                     type="number"
-                    value={ex.sets_done}
-                    onChange={(e) => updateExercise(ex.id, 'sets_done', parseInt(e.target.value) || 0)}
+                    value={ex.actual_sets}
+                    onChange={(e) => updateExercise(ex.id, 'actual_sets', parseInt(e.target.value) || 0)}
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                     min="0"
                   />
@@ -184,8 +184,8 @@ export function TodayWorkoutClient({ session, exercises: initialExercises }: Pro
                   <label className="block text-xs text-gray-600 mb-1">Reps</label>
                   <input
                     type="text"
-                    value={ex.reps_done}
-                    onChange={(e) => updateExercise(ex.id, 'reps_done', e.target.value)}
+                    value={ex.actual_reps}
+                    onChange={(e) => updateExercise(ex.id, 'actual_reps', e.target.value)}
                     placeholder="10/10/8"
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
                   />
@@ -194,8 +194,8 @@ export function TodayWorkoutClient({ session, exercises: initialExercises }: Pro
                   <label className="block text-xs text-gray-600 mb-1">Carga (kg)</label>
                   <input
                     type="number"
-                    value={ex.load || ''}
-                    onChange={(e) => updateExercise(ex.id, 'load', e.target.value ? parseFloat(e.target.value) : null)}
+                    value={ex.actual_load || ''}
+                    onChange={(e) => updateExercise(ex.id, 'actual_load', e.target.value ? parseFloat(e.target.value) : null)}
                     placeholder="20"
                     step="0.5"
                     className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"

@@ -234,13 +234,21 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
               </div>
 
               <div className="space-y-2">
-                {/* Templates Link */}
-                <Link
-                  href={`/app/personal/students/${student.id}/templates`}
-                  className="block w-full text-center text-sm bg-green-100 hover:bg-green-200 text-green-800 py-2 rounded font-medium transition"
-                >
-                  📋 Ver Templates
-                </Link>
+                {/* Quick Links */}
+                <div className="grid grid-cols-2 gap-2">
+                  <Link
+                    href={`/app/personal/students/${student.id}/templates`}
+                    className="block text-center text-xs bg-green-100 hover:bg-green-200 text-green-800 py-2 rounded font-medium transition"
+                  >
+                    📋 Templates
+                  </Link>
+                  <Link
+                    href={`/app/personal/students/${student.id}/history`}
+                    className="block text-center text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 py-2 rounded font-medium transition"
+                  >
+                    📊 Histórico
+                  </Link>
+                </div>
 
                 {/* Actions */}
                 <div className="flex gap-2">

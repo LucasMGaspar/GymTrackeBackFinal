@@ -38,7 +38,7 @@ export async function POST(request: Request) {
       .select('id')
       .eq('student_user_id', user.id)
       .eq('template_id', currentSession.template_id)
-      .eq('status', 'done')
+      .eq('status', 'completed')
       .order('session_date', { ascending: false })
       .limit(1)
       .single();
@@ -53,7 +53,7 @@ export async function POST(request: Request) {
     // Get exercises from last session
     const { data: lastExercises } = await supabase
       .from('workout_session_exercises')
-      .select('exercise_id, sets_done, reps_done, load')
+      .select('exercise_id, actual_sets, actual_reps, actual_load')
       .eq('session_id', lastSession.id)
       .order('sort_order');
 
@@ -79,9 +79,9 @@ export async function POST(request: Request) {
       return supabase
         .from('workout_session_exercises')
         .update({
-          sets_done: lastEx.sets_done,
-          reps_done: lastEx.reps_done,
-          load: lastEx.load,
+          actual_sets: lastEx.actual_sets,
+          actual_reps: lastEx.actual_reps,
+          actual_load: lastEx.actual_load,
         })
         .eq('id', currentEx.id)
         .select()

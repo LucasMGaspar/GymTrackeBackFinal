@@ -4,9 +4,9 @@ import { z } from 'zod';
 
 const ExerciseSchema = z.object({
   id: z.string().uuid(),
-  sets_done: z.number().int().min(0),
-  reps_done: z.string(),
-  load: z.number().nullable(),
+  actual_sets: z.number().int().min(0),
+  actual_reps: z.string(),
+  actual_load: z.number().nullable(),
 });
 
 const CompleteWorkoutSchema = z.object({
@@ -45,21 +45,27 @@ export async function POST(request: Request) {
       supabase
         .from('workout_session_exercises')
         .update({
-          sets_done: ex.sets_done,
-          reps_done: ex.reps_done,
-          load: ex.load,
+          actual_sets: ex.actual_sets,
+          actual_reps: ex.actual_reps,
+          actual_load: ex.actual_load,
         })
         .eq('id', ex.id)
     );
 
     await Promise.all(updates);
 
+    // Calculate duration
+    const startTime = new Date(session.created_at);
+    const endTime = new Date();
+    const duration_minutes = Math.round((endTime.getTime() - startTime.getTime()) / 60000);
+
     // Mark session as complete
     await supabase
       .from('workout_sessions')
       .update({
-        status: 'done',
+        status: 'completed',
         completed_at: new Date().toISOString(),
+        duration_minutes,
       })
       .eq('id', sessionId);
 

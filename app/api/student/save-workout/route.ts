@@ -4,9 +4,9 @@ import { z } from 'zod';
 
 const ExerciseSchema = z.object({
   id: z.string().uuid(),
-  sets_done: z.number().int().min(0),
-  reps_done: z.string(),
-  load: z.number().nullable(),
+  actual_sets: z.number().int().min(0),
+  actual_reps: z.string(),
+  actual_load: z.number().nullable(),
 });
 
 const SaveWorkoutSchema = z.object({
@@ -32,9 +32,9 @@ export async function POST(request: Request) {
       supabase
         .from('workout_session_exercises')
         .update({
-          sets_done: ex.sets_done,
-          reps_done: ex.reps_done,
-          load: ex.load,
+          actual_sets: ex.actual_sets,
+          actual_reps: ex.actual_reps,
+          actual_load: ex.actual_load,
         })
         .eq('id', ex.id)
     );

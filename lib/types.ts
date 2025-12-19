@@ -1,7 +1,7 @@
 // Database types
 export type UserRole = 'personal' | 'student';
 export type StudentStatus = 'invited' | 'active' | 'inactive';
-export type WorkoutSessionStatus = 'in_progress' | 'done';
+export type WorkoutSessionStatus = 'in_progress' | 'completed';
 
 export interface Profile {
   id: string;
@@ -52,9 +52,13 @@ export interface WorkoutTemplateExercise {
 export interface WorkoutSession {
   id: string;
   student_user_id: string;
+  student_id: string | null;
   template_id: string | null;
+  template_name: string | null;
   session_date: string;
   status: WorkoutSessionStatus;
+  notes: string | null;
+  duration_minutes: number | null;
   completed_at: string | null;
   created_at: string;
   template?: WorkoutTemplate; // Joined data
@@ -65,9 +69,11 @@ export interface WorkoutSessionExercise {
   session_id: string;
   exercise_id: string;
   sort_order: number;
-  sets_done: number;
-  reps_done: string;
-  load: number | null;
+  target_sets: number | null;
+  target_reps: string | null;
+  actual_sets: number;
+  actual_reps: string;
+  actual_load: number | null;
   notes: string | null;
   exercise?: Exercise; // Joined data
 }
