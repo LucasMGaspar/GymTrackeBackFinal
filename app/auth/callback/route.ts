@@ -6,20 +6,32 @@ export async function GET(request: Request) {
   const code = searchParams.get('code');
   const next = searchParams.get('next') ?? '/';
 
+  // Debug logs
+  console.log('🔍 Auth Callback - Debug:');
+  console.log('- Code:', code ? 'presente' : 'ausente');
+  console.log('- Origin:', origin);
+  console.log('- URL completa:', request.url);
+
   if (code) {
     const supabase = await createClient();
+    console.log('🔄 Trocando code por sessão...');
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     
     if (!error && data.user) {
+      console.log('✅ Sessão criada! User ID:', data.user.id);
+      
       // Check if user has a profile
       const { data: profile } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', data.user.id)
         .single();
+      
+      console.log('👤 Profile:', profile ? `role=${profile.role}` : 'não existe');
 
       // If no profile exists, create one (default to student)
       if (!profile) {
+        console.log('🆕 Criando profile como student...');
         await supabase.from('profiles').insert({
           id: data.user.id,
           role: 'student',
@@ -42,6 +54,8 @@ export async function GET(request: Request) {
       const redirectPath = profile.role === 'personal' 
         ? '/app/personal' 
         : '/app/student/today';
+      
+      console.log('🚀 Redirecionando para:', redirectPath);
 
       const forwardedHost = request.headers.get('x-forwarded-host');
       const isLocalEnv = process.env.NODE_ENV === 'development';
@@ -57,5 +71,6 @@ export async function GET(request: Request) {
   }
 
   // Return the user to an error page with instructions
+  console.log('❌ Auth falhou - redirecionando para login');
   return NextResponse.redirect(`${origin}/login?error=auth_failed`);
 }
