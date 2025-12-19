@@ -1,9 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
-import { HistoryClient } from './HistoryClient';
-import type { WorkoutSession } from '@/lib/types';
+import { DashboardClient } from './DashboardClient';
 
-export default async function StudentHistoryPage() {
+export default async function StudentDashboardPage() {
   const supabase = await createClient();
   
   const {
@@ -17,7 +16,7 @@ export default async function StudentHistoryPage() {
   // Get user role
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role, name')
     .eq('user_id', user.id)
     .single();
 
@@ -36,9 +35,9 @@ export default async function StudentHistoryPage() {
     redirect('/login');
   }
 
-  // Get last 14 days of completed sessions
-  const fourteenDaysAgo = new Date();
-  fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+  // Get all completed sessions (last 90 days for PRs and trends)
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
   const { data: sessions } = await supabase
     .from('workout_sessions')
@@ -49,11 +48,15 @@ export default async function StudentHistoryPage() {
         exercise:exercises(*)
       )
     `)
-    .eq('student_id', student.id)
+    .eq('student_user_id', user.id)
     .eq('status', 'completed')
-    .gte('session_date', fourteenDaysAgo.toISOString().split('T')[0])
-    .order('session_date', { ascending: false })
-    .order('completed_at', { ascending: false });
+    .gte('session_date', ninetyDaysAgo.toISOString().split('T')[0])
+    .order('session_date', { ascending: false });
 
-  return <HistoryClient sessions={(sessions || []) as any[]} />;
+  return (
+    <DashboardClient
+      studentName={profile.name}
+      sessions={(sessions || []) as any[]}
+    />
+  );
 }

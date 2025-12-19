@@ -43,10 +43,20 @@ export function TopNav({ profile, title }: TopNavProps) {
 
         {/* Student Navigation */}
         {isStudent && (
-          <div className="flex gap-2 px-4 pb-3">
+          <div className="flex gap-2 px-4 pb-3 overflow-x-auto">
+            <Link
+              href="/app/student/dashboard"
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition whitespace-nowrap ${
+                pathname === '/app/student/dashboard'
+                  ? 'bg-blue-600 text-white'
+                  : 'text-gray-700 hover:bg-gray-100'
+              }`}
+            >
+              📊 Dashboard
+            </Link>
             <Link
               href="/app/student/today"
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition whitespace-nowrap ${
                 pathname === '/app/student/today'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-700 hover:bg-gray-100'
@@ -56,13 +66,13 @@ export function TopNav({ profile, title }: TopNavProps) {
             </Link>
             <Link
               href="/app/student/history"
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition ${
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition whitespace-nowrap ${
                 pathname === '/app/student/history'
                   ? 'bg-blue-600 text-white'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
-              📊 Histórico
+              📜 Histórico
             </Link>
           </div>
         )}
