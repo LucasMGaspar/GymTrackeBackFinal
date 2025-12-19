@@ -35,6 +35,11 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Allow auth callback to process
+  if (request.nextUrl.pathname === '/auth/callback') {
+    return supabaseResponse;
+  }
+
   // Protection: redirect to login if not authenticated
   if (!user && !request.nextUrl.pathname.startsWith('/login')) {
     const url = request.nextUrl.clone();
