@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import type { Student } from '@/lib/types';
 import { EmptyState } from '@/components/EmptyState';
 import { StudentModal } from './StudentModal';
@@ -233,6 +234,14 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
               </div>
 
               <div className="space-y-2">
+                {/* Templates Link */}
+                <Link
+                  href={`/app/personal/students/${student.id}/templates`}
+                  className="block w-full text-center text-sm bg-green-100 hover:bg-green-200 text-green-800 py-2 rounded font-medium transition"
+                >
+                  📋 Ver Templates
+                </Link>
+
                 {/* Actions */}
                 <div className="flex gap-2">
                   <button
