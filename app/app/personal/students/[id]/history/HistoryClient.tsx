@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
+import { GenerateReportButton } from '@/components/GenerateReportButton';
 import type { Student, WorkoutSession, WorkoutSessionExercise, Exercise } from '@/lib/types';
 import { EmptyState } from '@/components/EmptyState';
 import { SessionDetailModal } from './SessionDetailModal';
@@ -105,12 +106,20 @@ export function HistoryClient({ student, sessions, currentUserId, currentUserRol
         >
           ← Voltar para Alunos
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">
-          Histórico - {student.student_name}
-        </h1>
-        <p className="text-gray-600 text-sm mt-1">
-          Treinos completados nos últimos 30 dias
-        </p>
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1">
+            <h1 className="text-2xl font-bold text-gray-900">
+              Histórico - {student.student_name}
+            </h1>
+            <p className="text-gray-600 text-sm mt-1">
+              Treinos completados nos últimos 30 dias
+            </p>
+          </div>
+          <GenerateReportButton 
+            studentId={student.id}
+            studentName={student.student_name}
+          />
+        </div>
       </div>
 
       {/* Stats */}

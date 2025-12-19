@@ -2,11 +2,12 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import type { ReactElement } from 'react';
 
 interface NavItem {
   href: string;
   label: string;
-  icon: (active: boolean) => JSX.Element;
+  icon: (active: boolean) => ReactElement;
 }
 
 const studentNav: NavItem[] = [
