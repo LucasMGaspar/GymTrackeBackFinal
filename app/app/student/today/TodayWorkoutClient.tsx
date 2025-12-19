@@ -124,85 +124,107 @@ export function TodayWorkoutClient({ session, exercises: initialExercises }: Pro
           <button
             onClick={copyLastSession}
             disabled={loading}
-            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 py-2 px-4 rounded-lg transition text-sm font-medium disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 bg-gray-100 hover:bg-gray-200 text-gray-700 py-3 px-4 rounded-xl transition text-sm font-semibold disabled:opacity-50"
           >
-            📋 Copiar última sessão
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+            Copiar Última
           </button>
           <button
             onClick={saveProgress}
             disabled={saving}
-            className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 py-2 px-4 rounded-lg transition text-sm font-medium disabled:opacity-50"
+            className="flex-1 flex items-center justify-center gap-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 py-3 px-4 rounded-xl transition text-sm font-semibold disabled:opacity-50"
           >
-            {saving ? '💾 Salvando...' : '💾 Salvar progresso'}
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+            {saving ? 'Salvando...' : 'Salvar'}
           </button>
         </div>
       )}
 
       {/* Exercises List */}
-      <div className="space-y-3">
-        {exercises.map((ex) => (
-          <div key={ex.id} className="bg-white rounded-lg shadow-sm p-4">
-            <div className="mb-3">
-              <h3 className="font-semibold text-gray-900">{ex.exercise.name}</h3>
-              {ex.exercise.muscle_group && (
-                <p className="text-xs text-gray-500">{ex.exercise.muscle_group}</p>
-              )}
+      <div className="space-y-4">
+        {exercises.map((ex, index) => (
+          <div key={ex.id} className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-200">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-white bg-opacity-20 rounded-lg flex items-center justify-center">
+                    <span className="text-white font-bold text-sm">{index + 1}</span>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white">{ex.exercise.name}</h3>
+                    {ex.exercise.muscle_group && (
+                      <p className="text-xs text-white opacity-90">{ex.exercise.muscle_group}</p>
+                    )}
+                  </div>
+                </div>
+                {isCompleted && (
+                  <div className="bg-white bg-opacity-20 rounded-full px-3 py-1">
+                    <span className="text-white text-xs font-semibold">✓ Completo</span>
+                  </div>
+                )}
+              </div>
             </div>
 
-            {isCompleted ? (
-              <div className="bg-gray-50 rounded p-3">
-                <div className="grid grid-cols-3 gap-3 text-sm">
-                  <div>
-                    <span className="text-gray-600">Séries:</span>
-                    <span className="ml-2 font-semibold">{ex.actual_sets}</span>
+            {/* Body */}
+            <div className="p-5">
+              {isCompleted ? (
+                <div className="grid grid-cols-3 gap-4">
+                  <div className="text-center p-3 bg-indigo-50 rounded-lg">
+                    <div className="text-xs text-indigo-600 font-semibold mb-1">Séries</div>
+                    <div className="text-2xl font-bold text-indigo-700">{ex.actual_sets}</div>
                   </div>
-                  <div>
-                    <span className="text-gray-600">Reps:</span>
-                    <span className="ml-2 font-semibold">{ex.actual_reps || '-'}</span>
+                  <div className="text-center p-3 bg-purple-50 rounded-lg">
+                    <div className="text-xs text-purple-600 font-semibold mb-1">Reps</div>
+                    <div className="text-lg font-bold text-purple-700">{ex.actual_reps || '-'}</div>
                   </div>
-                  <div>
-                    <span className="text-gray-600">Carga:</span>
-                    <span className="ml-2 font-semibold">
+                  <div className="text-center p-3 bg-green-50 rounded-lg">
+                    <div className="text-xs text-green-600 font-semibold mb-1">Carga</div>
+                    <div className="text-lg font-bold text-green-700">
                       {ex.actual_load ? `${ex.actual_load}kg` : '-'}
-                    </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">Séries</label>
-                  <input
-                    type="number"
-                    value={ex.actual_sets}
-                    onChange={(e) => updateExercise(ex.id, 'actual_sets', parseInt(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                    min="0"
-                  />
+              ) : (
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">Séries</label>
+                    <input
+                      type="number"
+                      value={ex.actual_sets}
+                      onChange={(e) => updateExercise(ex.id, 'actual_sets', parseInt(e.target.value) || 0)}
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-center font-semibold text-gray-900"
+                      min="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">Reps</label>
+                    <input
+                      type="text"
+                      value={ex.actual_reps}
+                      onChange={(e) => updateExercise(ex.id, 'actual_reps', e.target.value)}
+                      placeholder="10/10/8"
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-center font-semibold text-gray-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-700 mb-2">Carga (kg)</label>
+                    <input
+                      type="number"
+                      value={ex.actual_load || ''}
+                      onChange={(e) => updateExercise(ex.id, 'actual_load', e.target.value ? parseFloat(e.target.value) : null)}
+                      placeholder="20"
+                      step="0.5"
+                      className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none text-center font-semibold text-gray-900"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">Reps</label>
-                  <input
-                    type="text"
-                    value={ex.actual_reps}
-                    onChange={(e) => updateExercise(ex.id, 'actual_reps', e.target.value)}
-                    placeholder="10/10/8"
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-600 mb-1">Carga (kg)</label>
-                  <input
-                    type="number"
-                    value={ex.actual_load || ''}
-                    onChange={(e) => updateExercise(ex.id, 'actual_load', e.target.value ? parseFloat(e.target.value) : null)}
-                    placeholder="20"
-                    step="0.5"
-                    className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
-                  />
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         ))}
       </div>
@@ -212,9 +234,12 @@ export function TodayWorkoutClient({ session, exercises: initialExercises }: Pro
         <button
           onClick={completeWorkout}
           disabled={loading}
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 px-6 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
-          {loading ? 'Concluindo...' : '✓ Concluir Treino'}
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          {loading ? 'Concluindo...' : 'Concluir Treino'}
         </button>
       )}
     </div>

@@ -159,9 +159,12 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
         </div>
         <button
           onClick={handleCreate}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition"
+          className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
         >
-          + Novo Aluno
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Novo Aluno
         </button>
       </div>
 
@@ -189,9 +192,9 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
             <button
               key={filter.key}
               onClick={() => setStatusFilter(filter.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition ${
+              className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
                 statusFilter === filter.key
-                  ? 'bg-blue-600 text-white'
+                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
                   : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
               }`}
             >
@@ -219,34 +222,46 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
           />
         )
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredStudents.map((student) => (
             <div
               key={student.id}
-              className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition"
+              className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-indigo-100 transition-all duration-200"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex-1">
-                  <h3 className="font-semibold text-gray-900">{student.student_name}</h3>
-                  <p className="text-sm text-gray-600">{student.student_email}</p>
+              {/* Header com gradiente */}
+              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-4">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-bold text-white text-lg truncate">{student.student_name}</h3>
+                    <p className="text-sm text-white opacity-90 truncate mt-1">{student.student_email}</p>
+                  </div>
+                  <div className="ml-3">
+                    {getStatusBadge(student.status)}
+                  </div>
                 </div>
-                {getStatusBadge(student.status)}
               </div>
 
-              <div className="space-y-2">
+              {/* Body */}
+              <div className="p-5 space-y-3">
                 {/* Quick Links */}
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   <Link
                     href={`/app/personal/students/${student.id}/templates`}
-                    className="block text-center text-xs bg-green-100 hover:bg-green-200 text-green-800 py-2 rounded font-medium transition"
+                    className="flex items-center justify-center gap-2 text-center text-sm bg-green-50 hover:bg-green-100 text-green-700 py-2.5 rounded-lg font-semibold transition"
                   >
-                    📋 Templates
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Templates
                   </Link>
                   <Link
                     href={`/app/personal/students/${student.id}/history`}
-                    className="block text-center text-xs bg-blue-100 hover:bg-blue-200 text-blue-800 py-2 rounded font-medium transition"
+                    className="flex items-center justify-center gap-2 text-center text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 py-2.5 rounded-lg font-semibold transition"
                   >
-                    📊 Histórico
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Histórico
                   </Link>
                 </div>
 
@@ -254,22 +269,27 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(student)}
-                    className="flex-1 text-sm text-blue-600 hover:text-blue-700 font-medium"
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-semibold text-sm hover:bg-indigo-100 transition"
                   >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
                     Editar
                   </button>
                   <button
                     onClick={() => handleToggleStatus(student)}
-                    className="flex-1 text-sm text-gray-600 hover:text-gray-700 font-medium"
                     disabled={student.status === 'invited'}
+                    className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-200 transition disabled:opacity-50"
                   >
                     {student.status === 'active' ? 'Desativar' : 'Ativar'}
                   </button>
                   <button
                     onClick={() => handleDeleteClick(student)}
-                    className="flex-1 text-sm text-red-600 hover:text-red-700 font-medium"
+                    className="px-3 py-2 bg-red-50 text-red-700 rounded-lg font-semibold text-sm hover:bg-red-100 transition"
                   >
-                    Deletar
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                   </button>
                 </div>
 
@@ -278,9 +298,12 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
                   <button
                     onClick={() => handleSendInvite(student)}
                     disabled={sendingInvite === student.id}
-                    className="w-full text-sm bg-yellow-100 hover:bg-yellow-200 text-yellow-800 py-2 rounded font-medium transition disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-2 text-sm bg-yellow-50 hover:bg-yellow-100 text-yellow-800 py-2.5 rounded-lg font-semibold transition disabled:opacity-50"
                   >
-                    {sendingInvite === student.id ? 'Enviando...' : '📧 Reenviar Convite'}
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    {sendingInvite === student.id ? 'Enviando...' : 'Reenviar Convite'}
                   </button>
                 )}
               </div>

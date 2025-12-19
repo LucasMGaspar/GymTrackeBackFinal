@@ -139,40 +139,40 @@ export function HistoryClient({ student, sessions }: Props) {
       <div className="flex gap-2 overflow-x-auto pb-2">
         <button
           onClick={() => setFilterPeriod('7days')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition ${
+          className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
             filterPeriod === '7days'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
           Últimos 7 dias
         </button>
         <button
           onClick={() => setFilterPeriod('14days')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition ${
+          className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
             filterPeriod === '14days'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
           Últimos 14 dias
         </button>
         <button
           onClick={() => setFilterPeriod('30days')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition ${
+          className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
             filterPeriod === '30days'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
           Últimos 30 dias
         </button>
         <button
           onClick={() => setFilterPeriod('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition ${
+          className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
             filterPeriod === 'all'
-              ? 'bg-blue-600 text-white'
-              : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-50'
+              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
           Todos
@@ -186,60 +186,77 @@ export function HistoryClient({ student, sessions }: Props) {
           description={`${student.student_name} ainda não completou nenhum treino neste período.`}
         />
       ) : (
-        <div className="space-y-3">
-          {filteredSessions.map((session) => (
-            <button
-              key={session.id}
-              onClick={() => setSelectedSession(session)}
-              className="w-full bg-white rounded-lg shadow-sm p-4 text-left hover:shadow-md transition border border-gray-200"
-            >
-              {/* Header */}
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex-1">
-                  <div className="font-semibold text-gray-900">{session.template_name}</div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    {formatDate(session.session_date)}
+        <div className="space-y-4">
+          {filteredSessions.map((session) => {
+            const totalSets = session.workout_session_exercises.reduce(
+              (sum, e) => sum + e.actual_sets,
+              0
+            );
+            return (
+              <button
+                key={session.id}
+                onClick={() => setSelectedSession(session)}
+                className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden text-left hover:shadow-lg hover:border-indigo-100 transition-all duration-200"
+              >
+                {/* Header com gradiente */}
+                <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-3">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <h3 className="font-bold text-white text-lg">{session.template_name}</h3>
+                      <p className="text-sm text-white opacity-90 mt-1">
+                        {formatDate(session.session_date)}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="bg-white bg-opacity-20 rounded-lg px-3 py-1">
+                        <div className="text-xs text-white font-semibold">
+                          {session.completed_at &&
+                            new Date(session.completed_at).toLocaleTimeString('pt-BR', {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                        </div>
+                      </div>
+                      {session.duration_minutes && (
+                        <div className="text-xs text-white opacity-90 mt-1">
+                          {formatDuration(session.duration_minutes)}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
-                <div className="text-right">
-                  <div className="text-xs text-gray-500">
-                    {session.completed_at &&
-                      new Date(session.completed_at).toLocaleTimeString('pt-BR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                      })}
+
+                {/* Body */}
+                <div className="p-5">
+                  <div className="flex items-center gap-4 mb-3">
+                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                      <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      {session.workout_session_exercises.length} exercícios
+                    </div>
+                    {totalSets > 0 && (
+                      <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
+                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {totalSets} séries
+                      </div>
+                    )}
                   </div>
-                  {session.duration_minutes && (
-                    <div className="text-xs text-gray-500 mt-1">
-                      {formatDuration(session.duration_minutes)}
+
+                  {/* Notes preview */}
+                  {session.notes && (
+                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">
+                      <p className="text-sm text-yellow-800 italic line-clamp-1">
+                        "{session.notes}"
+                      </p>
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* Stats */}
-              <div className="flex items-center gap-4 text-sm text-gray-600">
-                <span>💪 {session.workout_session_exercises.length} exercícios</span>
-                {session.workout_session_exercises.some((e) => e.actual_sets > 0) && (
-                  <span>
-                    ✓{' '}
-                    {session.workout_session_exercises.reduce(
-                      (sum, e) => sum + e.actual_sets,
-                      0
-                    )}{' '}
-                    séries
-                  </span>
-                )}
-              </div>
-
-              {/* Notes preview */}
-              {session.notes && (
-                <div className="mt-2 text-sm text-gray-600 italic line-clamp-1">
-                  "{session.notes}"
-                </div>
-              )}
-            </button>
-          ))}
+              </button>
+            );
+          })}
         </div>
       )}
 
