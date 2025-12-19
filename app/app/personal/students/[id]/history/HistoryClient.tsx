@@ -13,11 +13,13 @@ interface SessionWithExercises extends WorkoutSession {
 interface Props {
   student: Student;
   sessions: SessionWithExercises[];
+  currentUserId: string;
+  currentUserRole: 'student' | 'personal';
 }
 
 type FilterPeriod = 'all' | '7days' | '14days' | '30days';
 
-export function HistoryClient({ student, sessions }: Props) {
+export function HistoryClient({ student, sessions, currentUserId, currentUserRole }: Props) {
   const [selectedSession, setSelectedSession] = useState<SessionWithExercises | null>(null);
   const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>('30days');
 
@@ -264,6 +266,8 @@ export function HistoryClient({ student, sessions }: Props) {
       {selectedSession && (
         <SessionDetailModal
           session={selectedSession}
+          currentUserId={currentUserId}
+          currentUserRole={currentUserRole}
           onClose={() => setSelectedSession(null)}
         />
       )}

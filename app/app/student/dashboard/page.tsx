@@ -24,10 +24,10 @@ export default async function StudentDashboardPage() {
     redirect('/app/personal/students');
   }
 
-  // Get student record
+  // Get student record with streak data
   const { data: student } = await supabase
     .from('students')
-    .select('id')
+    .select('id, current_streak, longest_streak, last_workout_date, total_workouts_completed')
     .eq('user_id', user.id)
     .single();
 
@@ -56,6 +56,11 @@ export default async function StudentDashboardPage() {
   return (
     <DashboardClient
       studentName={profile.name}
+      studentId={student.id}
+      currentStreak={student.current_streak || 0}
+      longestStreak={student.longest_streak || 0}
+      lastWorkoutDate={student.last_workout_date}
+      totalWorkoutsCompleted={student.total_workouts_completed || 0}
       sessions={(sessions || []) as any[]}
     />
   );

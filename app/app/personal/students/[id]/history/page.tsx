@@ -54,6 +54,8 @@ export default async function PersonalStudentHistoryPage({
     <HistoryClient
       student={student as Student}
       sessions={(sessions || []) as any[]}
+      currentUserId={user.id}
+      currentUserRole="personal"
     />
   );
 }

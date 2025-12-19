@@ -2,6 +2,9 @@
 
 import { useMemo } from 'react';
 import Link from 'next/link';
+import { StreakDisplay } from '@/components/StreakDisplay';
+import { AchievementsBadges } from '@/components/AchievementsBadges';
+import { ProgressCharts } from '@/components/ProgressCharts';
 import type { WorkoutSession, WorkoutSessionExercise, Exercise } from '@/lib/types';
 
 interface SessionWithExercises extends WorkoutSession {
@@ -10,6 +13,11 @@ interface SessionWithExercises extends WorkoutSession {
 
 interface Props {
   studentName: string;
+  studentId: string;
+  currentStreak: number;
+  longestStreak: number;
+  lastWorkoutDate: string | null;
+  totalWorkoutsCompleted: number;
   sessions: SessionWithExercises[];
 }
 
@@ -20,7 +28,15 @@ interface PersonalRecord {
   reps: string;
 }
 
-export function DashboardClient({ studentName, sessions }: Props) {
+export function DashboardClient({ 
+  studentName, 
+  studentId,
+  currentStreak,
+  longestStreak,
+  lastWorkoutDate,
+  totalWorkoutsCompleted,
+  sessions 
+}: Props) {
   const metrics = useMemo(() => {
     const now = new Date();
     const thisMonth = now.getMonth();
@@ -137,6 +153,16 @@ export function DashboardClient({ studentName, sessions }: Props) {
         </p>
       </div>
 
+      {/* Streak Display */}
+      <StreakDisplay 
+        currentStreak={currentStreak}
+        longestStreak={longestStreak}
+        lastWorkoutDate={lastWorkoutDate}
+      />
+
+      {/* Achievements */}
+      <AchievementsBadges studentId={studentId} />
+
       {/* Main Metrics */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg shadow-md p-4 text-white">
@@ -202,6 +228,9 @@ export function DashboardClient({ studentName, sessions }: Props) {
           </div>
         )}
       </div>
+
+      {/* Progress Charts */}
+      <ProgressCharts sessions={sessions} />
 
       {/* Personal Records */}
       <div className="bg-white rounded-lg shadow-sm p-6">

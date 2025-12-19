@@ -55,5 +55,11 @@ export default async function StudentHistoryPage() {
     .order('session_date', { ascending: false })
     .order('completed_at', { ascending: false });
 
-  return <HistoryClient sessions={(sessions || []) as any[]} />;
+  return (
+    <HistoryClient 
+      sessions={(sessions || []) as any[]}
+      currentUserId={user.id}
+      currentUserRole="student"
+    />
+  );
 }

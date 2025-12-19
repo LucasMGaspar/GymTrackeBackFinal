@@ -17,6 +17,10 @@ export interface Student {
   student_name: string;
   student_email: string;
   status: StudentStatus;
+  current_streak: number;
+  longest_streak: number;
+  last_workout_date: string | null;
+  total_workouts_completed: number;
   created_at: string;
 }
 
@@ -60,6 +64,7 @@ export interface WorkoutSession {
   notes: string | null;
   duration_minutes: number | null;
   completed_at: string | null;
+  comment_count: number;
   created_at: string;
   template?: WorkoutTemplate; // Joined data
 }
@@ -76,4 +81,33 @@ export interface WorkoutSessionExercise {
   actual_load: number | null;
   notes: string | null;
   exercise?: Exercise; // Joined data
+}
+
+export interface WorkoutComment {
+  id: string;
+  session_id: string;
+  author_id: string;
+  content: string;
+  created_at: string;
+  updated_at: string;
+  author?: Profile; // Joined data
+}
+
+export interface Achievement {
+  id: string;
+  key: string;
+  name: string;
+  description: string;
+  icon: string;
+  requirement_type: 'streak' | 'total_workouts' | 'pr' | 'custom';
+  requirement_value: number;
+  created_at: string;
+}
+
+export interface StudentAchievement {
+  id: string;
+  student_id: string;
+  achievement_id: string;
+  earned_at: string;
+  achievement?: Achievement; // Joined data
 }

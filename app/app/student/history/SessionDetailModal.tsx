@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import { WorkoutComments } from '@/components/WorkoutComments';
 import type { WorkoutSession, WorkoutSessionExercise, Exercise } from '@/lib/types';
 
 interface SessionWithExercises extends WorkoutSession {
@@ -9,10 +10,12 @@ interface SessionWithExercises extends WorkoutSession {
 
 interface Props {
   session: SessionWithExercises;
+  currentUserId: string;
+  currentUserRole: 'student' | 'personal';
   onClose: () => void;
 }
 
-export function SessionDetailModal({ session, onClose }: Props) {
+export function SessionDetailModal({ session, currentUserId, currentUserRole, onClose }: Props) {
   useEffect(() => {
     document.body.style.overflow = 'hidden';
     return () => {
@@ -173,6 +176,15 @@ export function SessionDetailModal({ session, onClose }: Props) {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* Comments */}
+          <div className="bg-white rounded-lg border-2 border-gray-100 p-5">
+            <WorkoutComments 
+              sessionId={session.id}
+              currentUserId={currentUserId}
+              currentUserRole={currentUserRole}
+            />
           </div>
         </div>
 
