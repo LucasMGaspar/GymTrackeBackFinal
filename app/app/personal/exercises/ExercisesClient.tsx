@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useToast } from '@/components/ui/Toast';
 import type { Exercise } from '@/lib/types';
 import { EmptyState } from '@/components/EmptyState';
 import { ExerciseModal } from './ExerciseModal';
@@ -26,6 +27,7 @@ const MUSCLE_GROUPS = [
 
 export function ExercisesClient({ initialExercises, personalId }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [exercises, setExercises] = useState(initialExercises);
   const [filter, setFilter] = useState('Todos');
   const [search, setSearch] = useState('');
@@ -70,8 +72,9 @@ export function ExercisesClient({ initialExercises, personalId }: Props) {
       setExercises(exercises.filter((ex) => ex.id !== deletingExercise.id));
       setDeleteModalOpen(false);
       setDeletingExercise(null);
+      showToast('Exercício deletado com sucesso', 'success');
     } catch (error) {
-      alert('Erro ao deletar exercício');
+      showToast('Erro ao deletar exercício', 'error');
     }
   };
 

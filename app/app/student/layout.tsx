@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { AppLayout } from '@/components/AppLayout';
+import { ToastProvider } from '@/components/ui/Toast';
+import { BottomNav } from '@/components/ui/BottomNav';
 
 export default async function StudentLayout({
   children,
@@ -27,5 +29,12 @@ export default async function StudentLayout({
     redirect('/app/personal');
   }
 
-  return <AppLayout profile={profile}>{children}</AppLayout>;
+  return (
+    <ToastProvider>
+      <AppLayout profile={profile}>
+        <div className="pb-20 lg:pb-0">{children}</div>
+        <BottomNav />
+      </AppLayout>
+    </ToastProvider>
+  );
 }

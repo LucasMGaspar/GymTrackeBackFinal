@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useToast } from '@/components/ui/Toast';
 import type { Student } from '@/lib/types';
 import { EmptyState } from '@/components/EmptyState';
 import { StudentModal } from './StudentModal';
@@ -15,6 +16,7 @@ interface Props {
 
 export function StudentsClient({ initialStudents, personalId }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [students, setStudents] = useState(initialStudents);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -62,8 +64,9 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
       setStudents(students.filter((s) => s.id !== deletingStudent.id));
       setDeleteModalOpen(false);
       setDeletingStudent(null);
+      showToast('Aluno deletado com sucesso', 'success');
     } catch (error) {
-      alert('Erro ao deletar aluno');
+      showToast('Erro ao deletar aluno', 'error');
     }
   };
 
@@ -85,14 +88,15 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
       setStudents(students.map((s) => 
         s.id === student.id ? { ...s, status: newStatus } : s
       ));
+      showToast(`Aluno ${newStatus === 'active' ? 'ativado' : 'desativado'} com sucesso`, 'success');
     } catch (error) {
-      alert('Erro ao atualizar status');
+      showToast('Erro ao atualizar status', 'error');
     }
   };
 
   const handleSendInvite = async (student: Student) => {
     if (student.status !== 'invited') {
-      alert('Convite já foi aceito!');
+      showToast('Convite já foi aceito!', 'info');
       return;
     }
 
@@ -107,9 +111,9 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
 
       if (!response.ok) throw new Error('Failed to send invite');
 
-      alert(`Convite enviado para ${student.student_email}!`);
+      showToast(`Convite enviado para ${student.student_email}! 📧`, 'success');
     } catch (error) {
-      alert('Erro ao enviar convite');
+      showToast('Erro ao enviar convite', 'error');
     } finally {
       setSendingInvite(null);
     }

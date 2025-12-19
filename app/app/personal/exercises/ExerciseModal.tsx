@@ -82,8 +82,9 @@ export function ExerciseModal({ personalId, exercise, onClose, onSave }: Props) 
       if (!response.ok) throw new Error('Failed to save');
 
       onSave();
-    } catch (error) {
-      alert('Erro ao salvar exercício');
+    } catch (error: any) {
+      // Inline error display - no toast needed as modal shows errors
+      setErrors({ general: error.message || 'Erro ao salvar exercício' });
     } finally {
       setLoading(false);
     }
@@ -110,6 +111,13 @@ export function ExerciseModal({ personalId, exercise, onClose, onSave }: Props) 
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* General Error */}
+          {errors.general && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-800">{errors.general}</p>
+            </div>
+          )}
+          
           {/* Name */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">

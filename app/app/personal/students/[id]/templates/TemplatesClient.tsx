@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useToast } from '@/components/ui/Toast';
 import type { Student, WorkoutTemplate, Exercise, WorkoutTemplateExercise } from '@/lib/types';
 import { TemplateModal } from './TemplateModal';
 import { DeleteConfirmModal } from '@/components/DeleteConfirmModal';
@@ -29,6 +30,7 @@ const WEEKDAYS = [
 
 export function TemplatesClient({ student, initialTemplates, exercises }: Props) {
   const router = useRouter();
+  const { showToast } = useToast();
   const [templates, setTemplates] = useState<TemplateWithExercises[]>(initialTemplates);
   const [modalOpen, setModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -72,8 +74,9 @@ export function TemplatesClient({ student, initialTemplates, exercises }: Props)
       setTemplates(templates.filter((t) => t.id !== deletingTemplate.id));
       setDeleteModalOpen(false);
       setDeletingTemplate(null);
+      showToast('Template deletado com sucesso', 'success');
     } catch (error) {
-      alert('Erro ao deletar template');
+      showToast('Erro ao deletar template', 'error');
     }
   };
 

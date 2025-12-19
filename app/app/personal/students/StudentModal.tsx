@@ -81,7 +81,8 @@ export function StudentModal({ personalId, student, onClose, onSave }: Props) {
 
       onSave();
     } catch (error: any) {
-      alert(error.message || 'Erro ao salvar aluno');
+      // Inline error display - no toast needed as modal shows errors
+      setErrors({ general: error.message || 'Erro ao salvar aluno' });
     } finally {
       setLoading(false);
     }
@@ -108,6 +109,13 @@ export function StudentModal({ personalId, student, onClose, onSave }: Props) {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          {/* General Error */}
+          {errors.general && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-800">{errors.general}</p>
+            </div>
+          )}
+          
           {/* Name */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">

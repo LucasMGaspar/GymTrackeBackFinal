@@ -67,7 +67,7 @@ export function TemplateModal({ studentId, weekday, template, exercises, onClose
   const handleAddExercise = (exercise: Exercise) => {
     const alreadyAdded = templateExercises.some((te) => te.exercise_id === exercise.id);
     if (alreadyAdded) {
-      alert('Este exercício já foi adicionado!');
+      // Just return silently, the user will see the exercise is already in the list
       return;
     }
 
@@ -136,7 +136,7 @@ export function TemplateModal({ studentId, weekday, template, exercises, onClose
     }
 
     if (templateExercises.length === 0) {
-      alert('Adicione pelo menos um exercício ao template!');
+      setErrors({ general: 'Adicione pelo menos um exercício ao template!' });
       return;
     }
 
@@ -170,7 +170,7 @@ export function TemplateModal({ studentId, weekday, template, exercises, onClose
 
       onSave();
     } catch (error: any) {
-      alert(error.message || 'Erro ao salvar template');
+      setErrors({ general: error.message || 'Erro ao salvar template' });
     } finally {
       setLoading(false);
     }
@@ -200,6 +200,13 @@ export function TemplateModal({ studentId, weekday, template, exercises, onClose
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {/* General Error */}
+          {errors.general && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-800">{errors.general}</p>
+            </div>
+          )}
+          
           {/* Name */}
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
