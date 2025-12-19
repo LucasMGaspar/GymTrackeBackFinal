@@ -68,12 +68,12 @@ export default async function PersonalDashboard() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link
           href="/app/personal/students"
-          className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition border-2 border-transparent hover:border-blue-200"
+          className="bg-white rounded-lg shadow-sm p-6 hover:shadow-md transition border-2 border-transparent hover:border-green-200"
         >
           <div className="flex items-start justify-between mb-3">
             <div className="text-3xl">👥</div>
-            <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
-              Em breve
+            <span className="bg-green-100 text-green-800 text-xs font-semibold px-2 py-1 rounded">
+              ✓ Disponível
             </span>
           </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">Alunos</h2>
@@ -106,7 +106,7 @@ export default async function PersonalDashboard() {
         </h3>
         <ul className="text-blue-800 text-sm space-y-1">
           <li>✅ Adicione exercícios na sua biblioteca</li>
-          <li>• Cadastre seus alunos (em breve)</li>
+          <li>✅ Cadastre seus alunos e envie convites</li>
           <li>• Monte treinos por dia da semana (em breve)</li>
         </ul>
       </div>
