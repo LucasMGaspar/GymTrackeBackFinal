@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
 import { Check, Loader2 } from 'lucide-react';
@@ -43,6 +43,7 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
   const { showToast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
   const [autoCheckoutInProgress, setAutoCheckoutInProgress] = useState(false);
+  const checkoutAttemptedRef = useRef(false);
 
   const formatPrice = (cents: number, currency: string) => {
     const value = cents / 100;
@@ -83,35 +84,63 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
       // Remove checkout parameter from URL to prevent retry loop
       const url = new URL(window.location.href);
       url.searchParams.delete('checkout');
-      window.history.replaceState({}, '', url.toString());
+      router.replace(url.pathname + url.search, { scroll: false });
+      checkoutAttemptedRef.current = false;
+      setAutoCheckoutInProgress(false);
     }
   }, [showToast]);
 
   // Auto-trigger checkout if plan_slug is in URL (from login redirect)
   useEffect(() => {
     const checkoutPlan = searchParams.get('checkout');
-    if (checkoutPlan && plans.length > 0 && !autoCheckoutInProgress) {
-      const plan = plans.find(p => p.slug === checkoutPlan);
-      if (plan && !currentSubscription && !loading) {
-        setAutoCheckoutInProgress(true);
-        // Longer delay to ensure page is fully loaded and user is authenticated
-        const timeoutId = setTimeout(() => {
-          handleSubscribe(plan.slug);
-        }, 1500);
-        
-        // Cleanup timeout if component unmounts
-        return () => {
-          clearTimeout(timeoutId);
-          setAutoCheckoutInProgress(false);
-        };
-      } else if (checkoutPlan && currentSubscription) {
-        // User already has subscription, remove checkout param
-        const url = new URL(window.location.href);
-        url.searchParams.delete('checkout');
-        window.history.replaceState({}, '', url.toString());
-      }
+    
+    // If no checkout param, reset the ref
+    if (!checkoutPlan) {
+      checkoutAttemptedRef.current = false;
+      setAutoCheckoutInProgress(false);
+      return;
     }
-  }, [searchParams, plans, currentSubscription, handleSubscribe, loading, autoCheckoutInProgress]);
+
+    // If already attempted, don't try again
+    if (checkoutAttemptedRef.current) {
+      return;
+    }
+
+    // If plans not loaded yet, wait
+    if (plans.length === 0) {
+      return;
+    }
+
+    // If user already has subscription, remove checkout param
+    if (currentSubscription) {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('checkout');
+      router.replace(url.pathname + url.search, { scroll: false });
+      checkoutAttemptedRef.current = false;
+      return;
+    }
+
+    // If already loading, don't start another checkout
+    if (loading || autoCheckoutInProgress) {
+      return;
+    }
+
+    const plan = plans.find(p => p.slug === checkoutPlan);
+    if (plan) {
+      checkoutAttemptedRef.current = true;
+      setAutoCheckoutInProgress(true);
+      
+      // Longer delay to ensure page is fully loaded and user is authenticated
+      const timeoutId = setTimeout(() => {
+        handleSubscribe(plan.slug);
+      }, 1500);
+      
+      // Cleanup timeout if component unmounts
+      return () => {
+        clearTimeout(timeoutId);
+      };
+    }
+  }, [searchParams, plans.length, currentSubscription?.id, loading, autoCheckoutInProgress, handleSubscribe, router]);
 
   const isCurrentPlan = (planId: string) => {
     return currentSubscription?.plan_id === planId && 
