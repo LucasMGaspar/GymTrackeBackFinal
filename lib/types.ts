@@ -94,6 +94,44 @@ export interface WorkoutComment {
   author?: Profile; // Joined data
 }
 
+export type GoalType =
+  | 'weight_loss'
+  | 'weight_gain'
+  | 'muscle_gain'
+  | 'fat_loss'
+  | 'circumference_reduction'
+  | 'circumference_increase'
+  | 'load_increase'
+  | 'workout_frequency';
+
+export type GoalStatus = 'active' | 'completed' | 'cancelled' | 'paused';
+
+export type CircumferenceType = 'chest' | 'waist' | 'hip' | 'arm' | 'thigh' | 'calf';
+
+export interface Goal {
+  id: string;
+  student_id: string;
+  personal_id: string;
+  title: string;
+  description: string | null;
+  goal_type: GoalType;
+  target_value: number;
+  initial_value: number | null;
+  current_value: number | null;
+  exercise_id: string | null;
+  exercise_name: string | null;
+  circumference_type: CircumferenceType | null;
+  start_date: string;
+  target_date: string;
+  completed_at: string | null;
+  status: GoalStatus;
+  progress_percentage: number;
+  created_by: string;
+  created_at: string;
+  updated_at: string;
+  exercise?: Exercise; // Joined data
+}
+
 export interface Achievement {
   id: string;
   key: string;
