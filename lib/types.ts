@@ -7,6 +7,7 @@ export interface Profile {
   id: string;
   role: UserRole;
   name: string;
+  email?: string;
   created_at: string;
 }
 

@@ -142,7 +142,11 @@ async function getOrCreateTodayWorkout(userId: string) {
 
         if (!linkError) {
           // Use the linked student
-          studentRecord = { id: studentToLink.id };
+          studentRecord = { 
+            id: studentToLink.id,
+            student_user_id: userId,
+            status: 'active' as const
+          };
         } else {
           console.error('Error linking student:', linkError);
           return null;
@@ -314,7 +318,11 @@ async function getAllTemplates(userId: string) {
             status: 'active',
           })
           .eq('id', studentToLink.id);
-        studentRecord = { id: studentToLink.id };
+        studentRecord = { 
+          id: studentToLink.id,
+          student_user_id: userId,
+          status: 'active' as const
+        };
       }
     }
   }
