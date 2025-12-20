@@ -26,8 +26,22 @@ export async function POST(request: NextRequest) {
     );
     if (rateLimitResponse) return rateLimitResponse;
 
+    // Check if MP_ACCESS_TOKEN is configured
+    if (!process.env.MP_ACCESS_TOKEN) {
+      console.error('[Checkout] MP_ACCESS_TOKEN not configured');
+      return NextResponse.json(
+        { error: 'Payment service not configured. Please contact support.' },
+        { status: 500 }
+      );
+    }
+
     const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+    if (userError) {
+      console.error('[Checkout] Error getting user:', userError);
+      return NextResponse.json({ error: 'Authentication error' }, { status: 401 });
+    }
 
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -58,20 +72,34 @@ export async function POST(request: NextRequest) {
       .eq('is_active', true)
       .single();
 
-    if (planError || !plan) {
+    if (planError) {
+      console.error('[Checkout] Error fetching plan:', planError);
       return NextResponse.json(
-        { error: 'Plan not found or inactive' },
+        { error: 'Plan not found or inactive', details: planError.message },
+        { status: 404 }
+      );
+    }
+
+    if (!plan) {
+      console.error('[Checkout] Plan not found for slug:', plan_slug);
+      return NextResponse.json(
+        { error: 'Plan not found. Please make sure the seed was executed.' },
         { status: 404 }
       );
     }
 
     // Check if user already has an active subscription
-    const { data: existingSubscription } = await supabase
+    const { data: existingSubscription, error: existingSubError } = await supabase
       .from('subscriptions')
       .select('*')
       .eq('personal_id', user.id)
       .in('status', ['trialing', 'active', 'past_due', 'pending'])
-      .single();
+      .maybeSingle();
+
+    if (existingSubError) {
+      console.error('[Checkout] Error checking existing subscription:', existingSubError);
+      // Continue anyway, might be a table issue
+    }
 
     if (existingSubscription) {
       return NextResponse.json(
@@ -113,6 +141,14 @@ export async function POST(request: NextRequest) {
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
     const backUrl = `${appUrl}/app/personal/billing?status=success`;
     
+    console.log('[Checkout] Creating preapproval with params:', {
+      reason: `Assinatura ${plan.name}`,
+      amount: plan.price_cents / 100,
+      currency: plan.currency,
+      interval: plan.interval,
+      backUrl,
+    });
+    
     const preapprovalResult = await createPreApproval({
       reason: `Assinatura ${plan.name}`,
       auto_recurring: {
@@ -129,12 +165,21 @@ export async function POST(request: NextRequest) {
     });
 
     if (!preapprovalResult.success || !preapprovalResult.data) {
-      console.error('[Checkout] Failed to create preapproval:', preapprovalResult.error);
+      console.error('[Checkout] Failed to create preapproval:', {
+        error: preapprovalResult.error,
+        details: preapprovalResult.details,
+      });
       return NextResponse.json(
-        { error: 'Failed to create checkout session', details: preapprovalResult.error },
+        { 
+          error: 'Failed to create checkout session', 
+          details: preapprovalResult.error || 'Unknown error',
+          message: 'Please check if MP_ACCESS_TOKEN is valid and Mercado Pago API is accessible'
+        },
         { status: 500 }
       );
     }
+
+    console.log('[Checkout] Preapproval created successfully:', preapprovalResult.data.id);
 
     // Create subscription record in database
     const subscriptionData = {
@@ -153,6 +198,8 @@ export async function POST(request: NextRequest) {
         : null,
     };
 
+    console.log('[Checkout] Creating subscription record:', subscriptionData);
+    
     const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
       .insert(subscriptionData)
@@ -160,16 +207,28 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (subError) {
-      console.error('[Checkout] Failed to create subscription:', subError);
+      console.error('[Checkout] Failed to create subscription:', {
+        error: subError,
+        code: subError.code,
+        message: subError.message,
+        details: subError.details,
+        hint: subError.hint,
+      });
       // Preapproval will be cleaned up by webhook or manual cancellation
       if (preapprovalResult.data?.id) {
         console.warn('[Checkout] Subscription creation failed, preapproval may need manual cleanup:', preapprovalResult.data.id);
       }
       return NextResponse.json(
-        { error: 'Failed to create subscription record' },
+        { 
+          error: 'Failed to create subscription record',
+          details: subError.message,
+          hint: subError.hint || 'Check if the subscriptions table exists and RLS policies are correct'
+        },
         { status: 500 }
       );
     }
+
+    console.log('[Checkout] Subscription created successfully:', subscription.id);
 
     // Return checkout URL
     const checkoutUrl = process.env.NODE_ENV === 'production'

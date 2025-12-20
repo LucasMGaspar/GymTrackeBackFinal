@@ -64,15 +64,26 @@ export async function createPreApproval(params: CreatePreApprovalParams) {
   try {
     const { preapproval } = getMercadoPagoClient();
     
+    const requestBody = {
+      reason: params.reason,
+      auto_recurring: params.auto_recurring,
+      back_url: params.back_url,
+      status: params.status || 'pending',
+      external_reference: params.external_reference,
+      payer_email: params.payer_email,
+    };
+
+    console.log('[MercadoPago] Creating preapproval with body:', JSON.stringify(requestBody, null, 2));
+    
     const response = await preapproval.create({
-      body: {
-        reason: params.reason,
-        auto_recurring: params.auto_recurring,
-        back_url: params.back_url,
-        status: params.status || 'pending',
-        external_reference: params.external_reference,
-        payer_email: params.payer_email,
-      },
+      body: requestBody,
+    });
+
+    console.log('[MercadoPago] Preapproval response:', {
+      id: response.id,
+      status: response.status,
+      has_init_point: !!response.init_point,
+      has_sandbox_init_point: !!(response as any).sandbox_init_point,
     });
 
     return {
@@ -86,11 +97,18 @@ export async function createPreApproval(params: CreatePreApprovalParams) {
       },
     };
   } catch (error: any) {
-    console.error('[MercadoPago] Error creating preapproval:', error);
+    console.error('[MercadoPago] Error creating preapproval:', {
+      message: error.message,
+      status: error.status,
+      statusCode: error.statusCode,
+      cause: error.cause,
+      stack: error.stack,
+    });
     return {
       success: false,
       error: error.message || 'Failed to create preapproval',
       details: error.cause || error,
+      statusCode: error.status || error.statusCode,
     };
   }
 }
