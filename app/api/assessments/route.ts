@@ -245,9 +245,48 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error('[Assessments] Error creating:', error);
+      console.error('[Assessments] Error creating:', {
+        error,
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        assessmentData,
+      });
+
+      // Check if table doesn't exist
+      if (error.code === '42P01' || error.message?.includes('does not exist')) {
+        return NextResponse.json(
+          { 
+            error: 'Tabela de avaliações não encontrada',
+            details: 'A migration 010_physical_assessments.sql precisa ser executada no Supabase primeiro.',
+            hint: 'Execute a migration no SQL Editor do Supabase Dashboard',
+            code: error.code,
+          },
+          { status: 500 }
+        );
+      }
+
+      // Check if it's an RLS policy error
+      if (error.code === '42501' || error.message?.includes('permission denied') || error.message?.includes('policy')) {
+        return NextResponse.json(
+          { 
+            error: 'Permissão negada: erro de política RLS',
+            details: error.message,
+            hint: 'Verifique se as políticas RLS foram criadas corretamente na migration',
+            code: error.code,
+          },
+          { status: 403 }
+        );
+      }
+
       return NextResponse.json(
-        { error: 'Failed to create assessment', details: error.message },
+        { 
+          error: 'Failed to create assessment', 
+          details: error.message,
+          hint: error.hint || 'Verifique os logs do servidor para mais detalhes',
+          code: error.code,
+        },
         { status: 500 }
       );
     }
