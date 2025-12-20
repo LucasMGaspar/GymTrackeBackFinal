@@ -167,8 +167,15 @@ export async function POST(request: NextRequest) {
     const result = goalSchema.safeParse(body);
 
     if (!result.success) {
+      console.error('[Goals] Validation error:', result.error.errors);
       return NextResponse.json(
-        { error: 'Validation failed', details: result.error.errors },
+        { 
+          error: 'Validation failed', 
+          details: result.error.errors.map(err => ({
+            path: err.path.join('.'),
+            message: err.message
+          }))
+        },
         { status: 400 }
       );
     }

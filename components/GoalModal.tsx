@@ -138,18 +138,27 @@ export function GoalModal({ student, goal, exercises = [], onClose, onSave }: Pr
       const data: any = {
         student_id: student.id,
         title: title.trim(),
-        description: description.trim() || null,
         goal_type: goalType,
         target_value: parseFloat(targetValue),
         start_date: startDate,
         target_date: targetDate,
       };
 
-      if (initialValue) {
-        data.initial_value = parseFloat(initialValue);
+      // Only add description if it's not empty
+      if (description.trim()) {
+        data.description = description.trim();
       }
 
-      if (requiresExercise) {
+      // Only add initial_value if provided
+      if (initialValue && initialValue.trim()) {
+        const parsed = parseFloat(initialValue.trim());
+        if (!isNaN(parsed)) {
+          data.initial_value = parsed;
+        }
+      }
+
+      // Only add exercise-related fields if required
+      if (requiresExercise && exerciseId) {
         data.exercise_id = exerciseId;
         const exercise = exercisesList.find((e) => e.id === exerciseId);
         if (exercise) {
@@ -157,7 +166,8 @@ export function GoalModal({ student, goal, exercises = [], onClose, onSave }: Pr
         }
       }
 
-      if (requiresCircumference) {
+      // Only add circumference_type if required
+      if (requiresCircumference && circumferenceType) {
         data.circumference_type = circumferenceType;
       }
 
@@ -180,7 +190,32 @@ export function GoalModal({ student, goal, exercises = [], onClose, onSave }: Pr
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.error || 'Failed to save goal');
+        // Show more detailed error if available
+        let errorMessage = result.error || 'Failed to save goal';
+        
+        if (result.details && Array.isArray(result.details)) {
+          // Format validation errors nicely
+          const formattedErrors = result.details.map((err: any) => {
+            const fieldName = err.path || 'campo';
+            return `${fieldName}: ${err.message}`;
+          }).join(', ');
+          errorMessage = `${errorMessage}: ${formattedErrors}`;
+        } else if (result.details) {
+          errorMessage = `${errorMessage}: ${JSON.stringify(result.details)}`;
+        }
+        
+        // Set field-specific errors if available
+        if (result.details && Array.isArray(result.details)) {
+          const fieldErrors: Record<string, string> = {};
+          result.details.forEach((err: any) => {
+            if (err.path) {
+              fieldErrors[err.path] = err.message;
+            }
+          });
+          setErrors(fieldErrors);
+        }
+        
+        throw new Error(errorMessage);
       }
 
       showToast(
@@ -191,8 +226,13 @@ export function GoalModal({ student, goal, exercises = [], onClose, onSave }: Pr
       onClose();
     } catch (error: any) {
       console.error('Error saving goal:', error);
-      showToast(error.message || 'Erro ao salvar meta', 'error');
-      setErrors({ general: error.message || 'Erro ao salvar meta' });
+      const errorMsg = error.message || 'Erro ao salvar meta';
+      showToast(errorMsg, 'error');
+      
+      // If no field-specific errors, show general error
+      if (Object.keys(errors).length === 0) {
+        setErrors({ general: errorMsg });
+      }
     } finally {
       setLoading(false);
     }
