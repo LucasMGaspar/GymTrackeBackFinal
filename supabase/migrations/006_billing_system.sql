@@ -47,10 +47,7 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
   trial_start TIMESTAMPTZ,
   trial_end TIMESTAMPTZ,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  -- Only one active subscription per personal
-  CONSTRAINT unique_active_subscription UNIQUE NULLS NOT DISTINCT (personal_id, status) 
-    WHERE status IN ('trialing', 'active', 'past_due', 'pending')
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 COMMENT ON TABLE public.subscriptions IS 'Active and historical subscriptions for personal trainers';
@@ -83,6 +80,12 @@ CREATE INDEX IF NOT EXISTS idx_subscriptions_mp_preapproval_id ON public.subscri
 CREATE INDEX IF NOT EXISTS idx_subscriptions_mp_subscription_id ON public.subscriptions(mp_subscription_id);
 CREATE INDEX IF NOT EXISTS idx_subscriptions_current_period_end ON public.subscriptions(current_period_end) 
   WHERE status IN ('active', 'trialing', 'past_due');
+
+-- Unique constraint: Only one active subscription per personal
+-- Using partial unique index instead of constraint
+CREATE UNIQUE INDEX IF NOT EXISTS idx_unique_active_subscription 
+  ON public.subscriptions(personal_id) 
+  WHERE status IN ('trialing', 'active', 'past_due', 'pending');
 
 CREATE INDEX IF NOT EXISTS idx_subscription_events_subscription_id ON public.subscription_events(subscription_id);
 CREATE INDEX IF NOT EXISTS idx_subscription_events_event_type ON public.subscription_events(event_type);
