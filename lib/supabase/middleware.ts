@@ -2,13 +2,25 @@ import { createServerClient } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function updateSession(request: NextRequest) {
+  // Check if environment variables are set
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error('Missing Supabase environment variables');
+    // Return a response that won't break the app
+    return NextResponse.next({
+      request,
+    });
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   });
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       cookies: {
         getAll() {
@@ -31,41 +43,47 @@ export async function updateSession(request: NextRequest) {
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
   // issues with users being randomly logged out.
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  // Allow auth callback to process
-  if (request.nextUrl.pathname === '/auth/callback') {
-    return supabaseResponse;
-  }
-
-  // Protection: redirect to login if not authenticated
-  if (!user && !request.nextUrl.pathname.startsWith('/login')) {
-    const url = request.nextUrl.clone();
-    url.pathname = '/login';
-    return NextResponse.redirect(url);
-  }
-
-  // If authenticated and trying to access login, redirect based on role
-  if (user && request.nextUrl.pathname.startsWith('/login')) {
-    // Get user profile to check role
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single();
-
-    const url = request.nextUrl.clone();
-    if (profile?.role === 'personal') {
-      url.pathname = '/app/personal';
-    } else if (profile?.role === 'student') {
-      url.pathname = '/app/student/today';
-    } else {
-      // No role set yet, redirect to a setup page or default
-      url.pathname = '/app/student/today';
+    // Allow auth callback to process
+    if (request.nextUrl.pathname === '/auth/callback') {
+      return supabaseResponse;
     }
-    return NextResponse.redirect(url);
+
+    // Protection: redirect to login if not authenticated
+    if (!user && !request.nextUrl.pathname.startsWith('/login')) {
+      const url = request.nextUrl.clone();
+      url.pathname = '/login';
+      return NextResponse.redirect(url);
+    }
+
+    // If authenticated and trying to access login, redirect based on role
+    if (user && request.nextUrl.pathname.startsWith('/login')) {
+      // Get user profile to check role
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      const url = request.nextUrl.clone();
+      if (profile?.role === 'personal') {
+        url.pathname = '/app/personal';
+      } else if (profile?.role === 'student') {
+        url.pathname = '/app/student/today';
+      } else {
+        // No role set yet, redirect to a setup page or default
+        url.pathname = '/app/student/today';
+      }
+      return NextResponse.redirect(url);
+    }
+  } catch (error) {
+    console.error('Middleware error:', error);
+    // Return response to prevent breaking the app
+    return supabaseResponse;
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is. If you're
