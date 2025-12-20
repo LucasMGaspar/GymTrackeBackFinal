@@ -55,6 +55,7 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
 
   const handleSubscribe = useCallback(async (planSlug: string) => {
     setLoading(planSlug);
+    setAutoCheckoutInProgress(false); // Hide indicator when starting manual checkout
     try {
       const response = await fetch('/api/billing/checkout', {
         method: 'POST',
@@ -71,6 +72,10 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
 
       // Redirect to Mercado Pago checkout
       if (data.checkout_url) {
+        // Clear states before redirect
+        setLoading(null);
+        setAutoCheckoutInProgress(false);
+        checkoutAttemptedRef.current = false;
         window.location.href = data.checkout_url;
       } else {
         throw new Error('No checkout URL received');
@@ -80,21 +85,21 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
       const errorMessage = error.message || 'Erro desconhecido ao criar checkout';
       showToast(`Erro ao criar checkout: ${errorMessage}`, 'error');
       setLoading(null);
+      setAutoCheckoutInProgress(false);
       
       // Remove checkout parameter from URL to prevent retry loop
       const url = new URL(window.location.href);
       url.searchParams.delete('checkout');
       router.replace(url.pathname + url.search, { scroll: false });
       checkoutAttemptedRef.current = false;
-      setAutoCheckoutInProgress(false);
     }
-  }, [showToast]);
+  }, [showToast, router]);
 
   // Auto-trigger checkout if plan_slug is in URL (from login redirect)
   useEffect(() => {
     const checkoutPlan = searchParams.get('checkout');
     
-    // If no checkout param, reset the ref
+    // If no checkout param, reset the ref and hide indicator
     if (!checkoutPlan) {
       checkoutAttemptedRef.current = false;
       setAutoCheckoutInProgress(false);
@@ -117,6 +122,7 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
       url.searchParams.delete('checkout');
       router.replace(url.pathname + url.search, { scroll: false });
       checkoutAttemptedRef.current = false;
+      setAutoCheckoutInProgress(false);
       return;
     }
 
@@ -130,14 +136,29 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
       checkoutAttemptedRef.current = true;
       setAutoCheckoutInProgress(true);
       
+      // Set a timeout to hide the indicator if checkout takes too long or fails
+      const hideIndicatorTimeout = setTimeout(() => {
+        setAutoCheckoutInProgress(false);
+        checkoutAttemptedRef.current = false;
+      }, 8000); // Hide after 8 seconds if still showing
+      
       // Longer delay to ensure page is fully loaded and user is authenticated
-      const timeoutId = setTimeout(() => {
-        handleSubscribe(plan.slug);
+      const checkoutTimeout = setTimeout(async () => {
+        try {
+          await handleSubscribe(plan.slug);
+          // If successful, handleSubscribe will redirect, so we clear timeout
+          clearTimeout(hideIndicatorTimeout);
+        } catch (error) {
+          // Error already handled in handleSubscribe, just clear timeout
+          clearTimeout(hideIndicatorTimeout);
+        }
       }, 1500);
       
-      // Cleanup timeout if component unmounts
+      // Cleanup timeouts if component unmounts
       return () => {
-        clearTimeout(timeoutId);
+        clearTimeout(checkoutTimeout);
+        clearTimeout(hideIndicatorTimeout);
+        setAutoCheckoutInProgress(false);
       };
     }
   }, [searchParams, plans.length, currentSubscription?.id, loading, autoCheckoutInProgress, handleSubscribe, router]);
