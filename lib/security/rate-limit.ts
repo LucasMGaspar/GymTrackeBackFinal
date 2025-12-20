@@ -35,9 +35,9 @@ export function rateLimit(
 ): NextResponse | null {
   // Obter IP do cliente
   const ip = 
-    request.ip || 
     request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 
     request.headers.get('x-real-ip') || 
+    request.headers.get('cf-connecting-ip') || // Cloudflare
     'unknown';
   
   const now = Date.now();

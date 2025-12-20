@@ -206,7 +206,6 @@ export function mapMPStatusToInternal(mpStatus: string): string {
     'authorized': 'active',
     'paused': 'paused',
     'cancelled': 'canceled',
-    'paused': 'paused',
   };
 
   return statusMap[mpStatus] || 'incomplete';
