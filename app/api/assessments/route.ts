@@ -252,6 +252,7 @@ export async function POST(request: NextRequest) {
         details: error.details,
         hint: error.hint,
         assessmentData,
+        userId: user.id,
       });
 
       // Check if table doesn't exist
@@ -268,15 +269,29 @@ export async function POST(request: NextRequest) {
       }
 
       // Check if it's an RLS policy error
-      if (error.code === '42501' || error.message?.includes('permission denied') || error.message?.includes('policy')) {
+      if (error.code === '42501' || error.message?.includes('permission denied') || error.message?.includes('policy') || error.message?.includes('new row violates row-level security')) {
         return NextResponse.json(
           { 
             error: 'Permissão negada: erro de política RLS',
             details: error.message,
-            hint: 'Verifique se as políticas RLS foram criadas corretamente na migration',
+            hint: 'As políticas RLS podem não ter sido criadas. Verifique se TODA a migration 010_physical_assessments.sql foi executada, incluindo as políticas RLS (linhas 93-130).',
             code: error.code,
+            troubleshooting: 'Execute este SQL no Supabase para verificar as políticas: SELECT * FROM pg_policies WHERE tablename = \'physical_assessments\';'
           },
           { status: 403 }
+        );
+      }
+
+      // Check for foreign key constraint errors
+      if (error.code === '23503' || error.message?.includes('foreign key')) {
+        return NextResponse.json(
+          { 
+            error: 'Erro de referência',
+            details: error.message,
+            hint: 'Verifique se o student_id e personal_id são válidos e existem nas tabelas students e profiles',
+            code: error.code,
+          },
+          { status: 400 }
         );
       }
 
@@ -286,6 +301,7 @@ export async function POST(request: NextRequest) {
           details: error.message,
           hint: error.hint || 'Verifique os logs do servidor para mais detalhes',
           code: error.code,
+          fullError: process.env.NODE_ENV === 'development' ? JSON.stringify(error, null, 2) : undefined,
         },
         { status: 500 }
       );
