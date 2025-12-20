@@ -110,7 +110,7 @@ export function AssessmentModal({ student, assessment, onClose, onSave }: Props)
         thigh_circumference: parseNumber(thighCircumference),
         calf_circumference: parseNumber(calfCircumference),
         notes: notes.trim() || null,
-        photos: [],
+        photos: photos,
       };
 
       const method = assessment ? 'PATCH' : 'POST';
