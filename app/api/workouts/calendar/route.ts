@@ -69,6 +69,16 @@ export async function GET(request: NextRequest) {
       }
 
       studentUserId = student.student_user_id;
+      
+      // If student hasn't accepted invite yet, return empty calendar
+      if (!studentUserId) {
+        return NextResponse.json({
+          year,
+          month,
+          sessions: [],
+          sessionsByDate: {},
+        });
+      }
     } else {
       // Student viewing their own calendar
       const { data: profile } = await supabase
@@ -84,8 +94,14 @@ export async function GET(request: NextRequest) {
       studentUserId = user.id;
     }
 
+    // If student not linked to account (shouldn't happen for student role, but handle gracefully)
     if (!studentUserId) {
-      return NextResponse.json({ error: 'Student not linked to account' }, { status: 404 });
+      return NextResponse.json({
+        year,
+        month,
+        sessions: [],
+        sessionsByDate: {},
+      });
     }
 
     // Fetch sessions for the month
