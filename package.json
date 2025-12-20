@@ -15,8 +15,6 @@
     "@supabase/ssr": "^0.5.2",
     "@supabase/supabase-js": "^2.45.6",
     "isomorphic-dompurify": "^2.34.0",
-    "jspdf": "^2.5.2",
-    "jspdf-autotable": "^3.8.4",
     "lucide-react": "^0.469.0",
     "mercadopago": "^2.11.0",
     "next": "^15.1.0",
