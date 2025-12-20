@@ -4,6 +4,10 @@ import { z } from 'zod';
 import { isValidUUID, sanitizeContent } from '@/lib/security/sanitize';
 import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 
+// Force dynamic rendering to avoid build-time analysis
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 const CreateCommentSchema = z.object({
   session_id: z.string().uuid(),
   content: z.string().min(1).max(1000),

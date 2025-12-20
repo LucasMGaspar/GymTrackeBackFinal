@@ -4,6 +4,10 @@ import { z } from 'zod';
 import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 import { cancelPreApproval, createPreApproval, createOrGetCustomer } from '@/lib/mercadopago/client';
 
+// Force dynamic rendering to avoid build-time analysis
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 const SwitchPlanSchema = z.object({
   plan_slug: z.string().min(1),
 });

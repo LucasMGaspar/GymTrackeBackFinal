@@ -4,6 +4,10 @@ import { z } from 'zod';
 import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 import { cancelPreApproval } from '@/lib/mercadopago/client';
 
+// Force dynamic rendering to avoid build-time analysis
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 const CancelSchema = z.object({
   immediate: z.boolean().optional().default(false),
 });

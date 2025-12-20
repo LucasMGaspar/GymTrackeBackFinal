@@ -3,6 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 
+// Force dynamic rendering to avoid build-time analysis
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 const TemplateExerciseSchema = z.object({
   exercise_id: z.string().uuid(),
   sort_order: z.number().int().min(1),

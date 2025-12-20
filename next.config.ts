@@ -6,8 +6,6 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  // Prevent API routes from being statically generated
-  output: 'standalone',
   async headers() {
     return [
       {
