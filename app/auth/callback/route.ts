@@ -17,8 +17,17 @@ export async function GET(request: Request) {
     const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
-      console.log('❌ Erro ao trocar code:', error.message);
-      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`);
+      console.log('❌ Erro ao trocar code:', error.message, error.status);
+      
+      // Handle specific error types
+      let errorMessage = 'Erro ao fazer login. Tente novamente.';
+      if (error.message.includes('expired') || error.status === 403) {
+        errorMessage = 'Link expirado. Solicite um novo link de acesso.';
+      } else if (error.message.includes('invalid')) {
+        errorMessage = 'Link inválido. Solicite um novo link de acesso.';
+      }
+      
+      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(errorMessage)}`);
     }
 
     console.log('✅ Sessão criada com sucesso!');
