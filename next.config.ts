@@ -6,6 +6,27 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '2mb',
     },
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      // Exclude jsPDF from server-side bundle to avoid CSS file access during build
+      config.externals = config.externals || [];
+      if (Array.isArray(config.externals)) {
+        config.externals.push({
+          'jspdf': 'commonjs jspdf',
+          'jspdf-autotable': 'commonjs jspdf-autotable',
+        });
+      } else if (typeof config.externals === 'object') {
+        config.externals = [
+          config.externals,
+          {
+            'jspdf': 'commonjs jspdf',
+            'jspdf-autotable': 'commonjs jspdf-autotable',
+          },
+        ];
+      }
+    }
+    return config;
+  },
   async headers() {
     return [
       {

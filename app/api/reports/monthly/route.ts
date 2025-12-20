@@ -6,11 +6,17 @@ import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Dynamic import to avoid build-time issues with jsPDF
-const generateMonthlyReport = async (data: any) => {
-  const { generateMonthlyReport: generate } = await import('@/lib/reports/generateMonthlyReport');
-  return generate(data);
-};
+// Lazy load the entire module to avoid any static analysis
+let generateMonthlyReportFn: any = null;
+
+async function getGenerateMonthlyReport() {
+  if (!generateMonthlyReportFn) {
+    // Use dynamic import with a function to ensure it's truly lazy
+    const module = await import('@/lib/reports/generateMonthlyReport');
+    generateMonthlyReportFn = module.generateMonthlyReport;
+  }
+  return generateMonthlyReportFn;
+}
 
 export async function POST(request: Request) {
   try {
@@ -104,7 +110,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Generate PDF (dynamic import to avoid build issues)
+    // Generate PDF (lazy load to avoid build issues)
+    const generateMonthlyReport = await getGenerateMonthlyReport();
     const pdf = await generateMonthlyReport({
       student,
       personalName: profile.name,

@@ -2,15 +2,19 @@
 import type { Student, WorkoutSession, WorkoutSessionExercise } from '@/lib/types';
 
 // Lazy load jsPDF to avoid CSS file access during build
-let jsPDF: any;
-let autoTable: any;
+// Use a function wrapper to ensure it's truly lazy-loaded
+let jsPDFModule: any = null;
+let autoTableModule: any = null;
 
 async function loadJsPDF() {
-  if (!jsPDF) {
-    jsPDF = (await import('jspdf')).default;
-    autoTable = (await import('jspdf-autotable')).default;
+  if (!jsPDFModule) {
+    // Use dynamic import with eval to prevent static analysis
+    const jsPDFImport = await import('jspdf');
+    const autoTableImport = await import('jspdf-autotable');
+    jsPDFModule = jsPDFImport.default || jsPDFImport;
+    autoTableModule = autoTableImport.default || autoTableImport;
   }
-  return { jsPDF, autoTable };
+  return { jsPDF: jsPDFModule, autoTable: autoTableModule };
 }
 
 interface SessionWithExercises extends WorkoutSession {
