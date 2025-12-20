@@ -204,9 +204,25 @@ export async function POST(request: NextRequest) {
       photos: data.photos || [],
     };
 
-    // Add optional fields only if provided
-    if (data.weight !== undefined && data.weight !== null) assessmentData.weight = data.weight;
-    if (data.height !== undefined && data.height !== null) assessmentData.height = data.height;
+    // Add optional fields only if provided, with validation for NUMERIC(5,2) = max 999.99
+    if (data.weight !== undefined && data.weight !== null) {
+      if (data.weight > 999.99 || data.weight < 0) {
+        return NextResponse.json(
+          { error: 'Peso inválido', details: 'O peso deve estar entre 0 e 999.99 kg' },
+          { status: 400 }
+        );
+      }
+      assessmentData.weight = Math.round(data.weight * 100) / 100; // Round to 2 decimals
+    }
+    if (data.height !== undefined && data.height !== null) {
+      if (data.height > 999.99 || data.height < 0) {
+        return NextResponse.json(
+          { error: 'Altura inválida', details: 'A altura deve estar entre 0 e 999.99 cm' },
+          { status: 400 }
+        );
+      }
+      assessmentData.height = Math.round(data.height * 100) / 100; // Round to 2 decimals
+    }
     if (data.body_fat_percentage !== undefined && data.body_fat_percentage !== null) 
       assessmentData.body_fat_percentage = data.body_fat_percentage;
     if (data.muscle_mass !== undefined && data.muscle_mass !== null) 

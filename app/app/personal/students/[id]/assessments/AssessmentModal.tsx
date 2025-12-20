@@ -68,8 +68,13 @@ export function AssessmentModal({ student, assessment, onClose, onSave }: Props)
 
   const parseNumber = (value: string): number | null => {
     if (!value || value.trim() === '') return null;
-    const parsed = parseFloat(value);
-    return isNaN(parsed) ? null : parsed;
+    // Replace comma with dot for decimal separator (Brazilian format)
+    // Remove any spaces and normalize
+    const normalizedValue = value.trim().replace(/,/g, '.').replace(/\s/g, '');
+    const parsed = parseFloat(normalizedValue);
+    if (isNaN(parsed)) return null;
+    // Round to 2 decimal places to avoid precision issues
+    return Math.round(parsed * 100) / 100;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
