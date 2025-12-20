@@ -344,6 +344,24 @@ export function AssessmentsClient({ student, assessments: initialAssessments }: 
                         </div>
                       )}
 
+                      {/* Fotos */}
+                      {assessment.photos && assessment.photos.length > 0 && (
+                        <div className="mb-4">
+                          <div className="text-sm text-gray-600 mb-2">Fotos:</div>
+                          <div className="grid grid-cols-3 md:grid-cols-4 gap-2">
+                            {assessment.photos.map((photoUrl, photoIndex) => (
+                              <img
+                                key={photoIndex}
+                                src={photoUrl}
+                                alt={`Foto ${photoIndex + 1}`}
+                                className="w-full h-24 object-cover rounded-lg border border-gray-200 cursor-pointer hover:opacity-80 transition-opacity"
+                                onClick={() => window.open(photoUrl, '_blank')}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Circunferências */}
                       {(assessment.chest_circumference !== null ||
                         assessment.waist_circumference !== null ||

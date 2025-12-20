@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import type { Student } from '@/lib/types';
 import { X, Loader2 } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
+import { PhotoUpload } from '@/components/PhotoUpload';
 
 interface Assessment {
   id: string;
@@ -58,6 +59,7 @@ export function AssessmentModal({ student, assessment, onClose, onSave }: Props)
   const [thighCircumference, setThighCircumference] = useState<string>(assessment?.thigh_circumference?.toString() || '');
   const [calfCircumference, setCalfCircumference] = useState<string>(assessment?.calf_circumference?.toString() || '');
   const [notes, setNotes] = useState(assessment?.notes || '');
+  const [photos, setPhotos] = useState<string[]>(assessment?.photos || []);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -65,6 +67,15 @@ export function AssessmentModal({ student, assessment, onClose, onSave }: Props)
       document.body.style.overflow = 'unset';
     };
   }, []);
+
+  // Atualizar fotos quando assessment mudar
+  useEffect(() => {
+    if (assessment?.photos) {
+      setPhotos(assessment.photos);
+    } else {
+      setPhotos([]);
+    }
+  }, [assessment?.photos]);
 
   const parseNumber = (value: string): number | null => {
     if (!value || value.trim() === '') return null;
@@ -373,6 +384,14 @@ export function AssessmentModal({ student, assessment, onClose, onSave }: Props)
                 </div>
               </div>
             </div>
+
+            {/* Fotos */}
+            <PhotoUpload
+              photos={photos}
+              onPhotosChange={setPhotos}
+              assessmentId={assessment?.id}
+              disabled={loading}
+            />
 
             {/* Observações */}
             <div>
