@@ -37,6 +37,10 @@ function generateIdempotencyKey(eventId: string, provider: string = 'mercadopago
   return `${provider}_${eventId}`;
 }
 
+// Force dynamic rendering to avoid build-time analysis
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 /**
  * POST /api/webhooks/mercadopago
  * Handle Mercado Pago webhook events
