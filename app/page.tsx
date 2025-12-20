@@ -5,7 +5,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
       {/* Header */}
-      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
+      <header className="bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
@@ -35,49 +35,67 @@ export default function Home() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
-        <div className="text-center">
-          <div className="inline-block mb-6">
-            <span className="bg-primary-100 text-primary-700 px-4 py-2 rounded-full text-sm font-semibold">
-              ✨ Plataforma #1 para Personal Trainers
-            </span>
+      {/* Hero Section with Dark Theme */}
+      <section className="relative overflow-hidden bg-dark-900 text-white">
+        {/* Background Pattern - Same as login */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 via-dark-900 to-accent-600/20" />
+          <div className="absolute top-0 left-0 w-full h-full opacity-30">
+            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-500 rounded-full filter blur-[120px] animate-blob" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-500 rounded-full filter blur-[120px] animate-blob animation-delay-2000" />
           </div>
-          <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold text-gray-900 mb-6 leading-tight">
-            Gerencie seus alunos de forma
-            <span className="text-primary-600 block">profissional</span>
-          </h1>
-          <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto mb-10 leading-relaxed">
-            A plataforma completa para personal trainers criarem treinos personalizados, 
-            acompanharem o progresso dos alunos e escalarem seus negócios.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-            <Link
-              href="/plans"
-              className="bg-primary-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary-600 transition-all shadow-lg hover:shadow-xl flex items-center justify-center transform hover:scale-105"
-            >
-              Ver Planos
-              <ArrowRight className="w-5 h-5 ml-2" />
-            </Link>
-            <Link
-              href="/login"
-              className="bg-white text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg hover:bg-gray-50 transition-all border-2 border-gray-200 shadow-md hover:shadow-lg"
-            >
-              Fazer Login
-            </Link>
-          </div>
-          <div className="flex items-center justify-center gap-8 text-sm text-gray-500">
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5 text-primary-500" />
-              <span>Sem cartão de crédito</span>
+          {/* Grid pattern */}
+          <div className="absolute inset-0 opacity-5" 
+            style={{
+              backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
+              backgroundSize: '60px 60px'
+            }} 
+          />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-32">
+          <div className="text-center">
+            <div className="inline-block mb-6">
+              <span className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-4 py-2 rounded-full text-sm font-semibold">
+                ✨ Plataforma #1 para Personal Trainers
+              </span>
             </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5 text-primary-500" />
-              <span>Teste grátis</span>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight">
+              Gerencie seus alunos de forma
+              <span className="text-gradient-primary block">profissional</span>
+            </h1>
+            <p className="text-xl md:text-2xl text-dark-200 max-w-3xl mx-auto mb-10 leading-relaxed">
+              A plataforma completa para personal trainers criarem treinos personalizados, 
+              acompanharem o progresso dos alunos e escalarem seus negócios.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+              <Link
+                href="/plans"
+                className="bg-primary-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary-600 transition-all shadow-lg hover:shadow-xl flex items-center justify-center transform hover:scale-105"
+              >
+                Ver Planos
+                <ArrowRight className="w-5 h-5 ml-2" />
+              </Link>
+              <Link
+                href="/login"
+                className="bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition-all"
+              >
+                Fazer Login
+              </Link>
             </div>
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5 text-primary-500" />
-              <span>Cancele quando quiser</span>
+            <div className="flex items-center justify-center gap-8 text-sm text-dark-300">
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-primary-400" />
+                <span>Sem cartão de crédito</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-primary-400" />
+                <span>Teste grátis</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-primary-400" />
+                <span>Cancele quando quiser</span>
+              </div>
             </div>
           </div>
         </div>
@@ -201,45 +219,61 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* How It Works Section with Dark Theme */}
+      <section className="relative overflow-hidden bg-dark-900 text-white py-20">
+        {/* Background Pattern */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-600/10 via-dark-900 to-accent-600/10" />
+          <div className="absolute top-0 left-0 w-full h-full opacity-20">
+            <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-primary-500 rounded-full filter blur-[120px]" />
+            <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-accent-500 rounded-full filter blur-[120px]" />
+          </div>
+          {/* Grid pattern */}
+          <div className="absolute inset-0 opacity-5" 
+            style={{
+              backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
+              backgroundSize: '60px 60px'
+            }} 
+          />
+        </div>
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4">
               Como funciona
             </h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-dark-200 max-w-2xl mx-auto">
               Comece a usar em minutos, sem complicação
             </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
             <div className="text-center">
-              <div className="bg-primary-500 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">
+              <div className="bg-primary-500 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg shadow-primary-500/25">
                 1
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Escolha seu plano</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold mb-3">Escolha seu plano</h3>
+              <p className="text-dark-300">
                 Selecione o plano ideal para o seu negócio. Teste grátis disponível em todos os planos pagos.
               </p>
             </div>
 
             <div className="text-center">
-              <div className="bg-primary-500 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">
+              <div className="bg-primary-500 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg shadow-primary-500/25">
                 2
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Crie sua conta</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold mb-3">Crie sua conta</h3>
+              <p className="text-dark-300">
                 Faça login com seu email. Receba um link mágico e comece a usar imediatamente.
               </p>
             </div>
 
             <div className="text-center">
-              <div className="bg-primary-500 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6">
+              <div className="bg-primary-500 text-white w-16 h-16 rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-lg shadow-primary-500/25">
                 3
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-3">Comece a gerenciar</h3>
-              <p className="text-gray-600">
+              <h3 className="text-xl font-bold mb-3">Comece a gerenciar</h3>
+              <p className="text-dark-300">
                 Adicione seus alunos, crie treinos personalizados e acompanhe o progresso de cada um.
               </p>
             </div>
@@ -326,23 +360,39 @@ export default function Home() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="bg-primary-600 text-white py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      {/* CTA Section with Dark Theme */}
+      <section className="relative overflow-hidden bg-dark-900 text-white py-20">
+        {/* Background Pattern */}
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary-600/20 via-dark-900 to-accent-600/20" />
+          <div className="absolute top-0 left-0 w-full h-full opacity-30">
+            <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-primary-500 rounded-full filter blur-[120px]" />
+            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-500 rounded-full filter blur-[120px]" />
+          </div>
+          {/* Grid pattern */}
+          <div className="absolute inset-0 opacity-5" 
+            style={{
+              backgroundImage: `linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)`,
+              backgroundSize: '60px 60px'
+            }} 
+          />
+        </div>
+
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Pronto para transformar seu negócio?
           </h2>
-          <p className="text-xl text-primary-100 mb-10 max-w-2xl mx-auto">
+          <p className="text-xl text-dark-200 mb-10 max-w-2xl mx-auto">
             Junte-se a centenas de personal trainers que já estão escalando seus negócios com o FitCoachPro.
           </p>
           <Link
             href="/plans"
-            className="bg-white text-primary-600 px-10 py-5 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-all shadow-xl hover:shadow-2xl inline-flex items-center transform hover:scale-105"
+            className="bg-primary-500 text-white px-10 py-5 rounded-xl font-semibold text-lg hover:bg-primary-600 transition-all shadow-xl hover:shadow-2xl inline-flex items-center transform hover:scale-105"
           >
             Ver Planos e Preços
             <ArrowRight className="w-5 h-5 ml-2" />
           </Link>
-          <p className="text-primary-200 text-sm mt-6">
+          <p className="text-dark-300 text-sm mt-6">
             ✓ Teste grátis • ✓ Sem cartão de crédito • ✓ Cancele quando quiser
           </p>
         </div>
