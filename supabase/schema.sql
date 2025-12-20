@@ -196,6 +196,25 @@ CREATE POLICY "Personal can delete their exercises"
   ON public.exercises FOR DELETE
   USING (personal_id = auth.uid());
 
+-- Students can view exercises that are in their templates or sessions
+CREATE POLICY "Students can view exercises in their workouts"
+  ON public.exercises FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM public.workout_template_exercises wte
+      JOIN public.workout_templates wt ON wt.id = wte.template_id
+      JOIN public.students s ON s.id = wt.student_id
+      WHERE wte.exercise_id = exercises.id
+      AND s.student_user_id = auth.uid()
+    )
+    OR EXISTS (
+      SELECT 1 FROM public.workout_session_exercises wse
+      JOIN public.workout_sessions ws ON ws.id = wse.session_id
+      WHERE wse.exercise_id = exercises.id
+      AND ws.student_user_id = auth.uid()
+    )
+  );
+
 -- =====================================================
 -- WORKOUT TEMPLATES POLICIES
 -- =====================================================

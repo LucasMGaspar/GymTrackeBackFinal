@@ -106,7 +106,7 @@ export function WorkoutComments({ sessionId, currentUserId, currentUserRole, onC
   const getRoleBadge = (role: string) => {
     if (role === 'personal') {
       return (
-        <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">
+        <span className="bg-primary-100 text-primary-700 text-xs font-bold px-2 py-0.5 rounded">
           PERSONAL
         </span>
       );
@@ -128,7 +128,7 @@ export function WorkoutComments({ sessionId, currentUserId, currentUserRole, onC
       {/* Header */}
       <div className="flex items-center justify-between">
         <h3 className="font-bold text-gray-900 flex items-center gap-2">
-          <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
           </svg>
           Comentários
@@ -139,7 +139,7 @@ export function WorkoutComments({ sessionId, currentUserId, currentUserRole, onC
         {!showInput && (
           <button
             onClick={() => setShowInput(true)}
-            className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold flex items-center gap-1"
+            className="text-sm text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -158,7 +158,7 @@ export function WorkoutComments({ sessionId, currentUserId, currentUserRole, onC
           <p className="text-sm text-gray-500 mb-3">Nenhum comentário ainda</p>
           <button
             onClick={() => setShowInput(true)}
-            className="text-sm text-indigo-600 hover:text-indigo-700 font-semibold"
+            className="text-sm text-primary-600 hover:text-primary-700 font-semibold"
           >
             Seja o primeiro a comentar
           </button>
@@ -172,7 +172,7 @@ export function WorkoutComments({ sessionId, currentUserId, currentUserRole, onC
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-500 rounded-full flex items-center justify-center">
+                  <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-primary-600 rounded-full flex items-center justify-center">
                     <span className="text-white text-sm font-bold">
                       {comment.author?.name?.charAt(0).toUpperCase() || '?'}
                     </span>
@@ -219,7 +219,7 @@ export function WorkoutComments({ sessionId, currentUserId, currentUserRole, onC
             }
             rows={3}
             maxLength={1000}
-            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none"
+            className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none resize-none"
             autoFocus
           />
           <div className="flex items-center justify-between">
@@ -240,7 +240,7 @@ export function WorkoutComments({ sessionId, currentUserId, currentUserRole, onC
               <button
                 type="submit"
                 disabled={submitting || !newComment.trim()}
-                className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+                className="px-4 py-2 text-sm font-semibold text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {submitting ? 'Enviando...' : 'Comentar'}
               </button>

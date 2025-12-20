@@ -53,19 +53,19 @@ export function BottomNav() {
               key={item.href}
               href={item.href}
               className={`relative flex flex-col items-center justify-center gap-1 transition-all duration-200 ${
-                isActive ? 'text-indigo-600' : 'text-gray-400 hover:text-gray-600'
+                isActive ? 'text-primary-600' : 'text-gray-400 hover:text-gray-600'
               }`}
             >
               {/* Active indicator */}
               {isActive && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-b-full" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-12 h-1 bg-gradient-to-r from-primary-500 to-primary-600 rounded-b-full" />
               )}
               
               <div className={`transition-transform duration-200 ${isActive ? 'scale-110' : ''}`}>
                 {item.icon(isActive)}
               </div>
               <span className={`text-xs font-semibold transition-all ${
-                isActive ? 'text-indigo-600' : 'text-gray-400'
+                isActive ? 'text-primary-600' : 'text-gray-400'
               }`}>
                 {item.label}
               </span>

@@ -39,14 +39,17 @@ export default async function PersonalDashboard() {
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const studentIds = (students || []).map((s) => s.id);
+  // Get student_user_ids from students (only those that are linked)
+  const studentUserIds = (students || [])
+    .map((s) => s.student_user_id)
+    .filter((id): id is string => id !== null);
   
   let recentSessions = [];
-  if (studentIds.length > 0) {
+  if (studentUserIds.length > 0) {
     const { data } = await supabase
       .from('workout_sessions')
-      .select('*, workout_session_exercises(*)')
-      .in('student_id', studentIds)
+      .select('*, template:workout_templates(*), workout_session_exercises(*)')
+      .in('student_user_id', studentUserIds)
       .eq('status', 'completed')
       .gte('session_date', thirtyDaysAgo.toISOString().split('T')[0]);
     

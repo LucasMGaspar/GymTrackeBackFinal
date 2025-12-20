@@ -41,18 +41,23 @@ export async function POST(request: Request) {
     }
 
     // Update exercises
-    const updates = exercises.map((ex) =>
-      supabase
+    const updatePromises = exercises.map(async (ex) => {
+      const { error: updateError } = await supabase
         .from('workout_session_exercises')
         .update({
           actual_sets: ex.actual_sets,
           actual_reps: ex.actual_reps,
           actual_load: ex.actual_load,
         })
-        .eq('id', ex.id)
-    );
+        .eq('id', ex.id);
 
-    await Promise.all(updates);
+      if (updateError) {
+        console.error('Error updating exercise:', ex.id, updateError);
+        throw updateError;
+      }
+    });
+
+    await Promise.all(updatePromises);
 
     // Calculate duration
     const startTime = new Date(session.created_at);
@@ -60,14 +65,31 @@ export async function POST(request: Request) {
     const duration_minutes = Math.round((endTime.getTime() - startTime.getTime()) / 60000);
 
     // Mark session as complete
-    await supabase
+    const { error: updateError, data: updatedSession } = await supabase
       .from('workout_sessions')
       .update({
         status: 'completed',
         completed_at: new Date().toISOString(),
         duration_minutes,
       })
-      .eq('id', sessionId);
+      .eq('id', sessionId)
+      .select()
+      .single();
+
+    if (updateError) {
+      console.error('Error updating session status:', updateError);
+      return NextResponse.json(
+        { error: 'Failed to mark session as complete' },
+        { status: 500 }
+      );
+    }
+
+    console.log('Session marked as completed:', {
+      id: updatedSession?.id,
+      status: updatedSession?.status,
+      completed_at: updatedSession?.completed_at,
+      session_date: updatedSession?.session_date,
+    });
 
     return NextResponse.json({ success: true });
   } catch (error) {

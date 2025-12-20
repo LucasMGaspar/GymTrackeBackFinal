@@ -35,20 +35,28 @@ export default async function PersonalStudentHistoryPage({
   const thirtyDaysAgo = new Date();
   thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  const { data: sessions } = await supabase
-    .from('workout_sessions')
-    .select(`
-      *,
-      workout_session_exercises(
+  // Use student_user_id to get sessions (workout_sessions uses student_user_id, not student_id)
+  // If student_user_id is null, return empty array (student hasn't accepted invite yet)
+  let sessions: any[] = [];
+  if (student.student_user_id) {
+    const { data: sessionsData } = await supabase
+      .from('workout_sessions')
+      .select(`
         *,
-        exercise:exercises(*)
-      )
-    `)
-    .eq('student_id', id)
-    .eq('status', 'completed')
-    .gte('session_date', thirtyDaysAgo.toISOString().split('T')[0])
-    .order('session_date', { ascending: false })
-    .order('completed_at', { ascending: false });
+        template:workout_templates(*),
+        workout_session_exercises(
+          *,
+          exercise:exercises(*)
+        )
+      `)
+      .eq('student_user_id', student.student_user_id)
+      .eq('status', 'completed')
+      .gte('session_date', thirtyDaysAgo.toISOString().split('T')[0])
+      .order('session_date', { ascending: false })
+      .order('completed_at', { ascending: false });
+    
+    sessions = sessionsData || [];
+  }
 
   return (
     <HistoryClient

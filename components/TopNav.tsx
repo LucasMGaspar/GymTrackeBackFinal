@@ -41,7 +41,7 @@ export function TopNav({ profile, title }: TopNavProps) {
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-3">
             {/* Logo */}
-            <div className="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+            <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-600 rounded-xl flex items-center justify-center shadow-lg">
               <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
@@ -81,7 +81,7 @@ export function TopNav({ profile, title }: TopNavProps) {
               href="/app/student/dashboard"
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all whitespace-nowrap ${
                 pathname === '/app/student/dashboard'
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
@@ -94,7 +94,7 @@ export function TopNav({ profile, title }: TopNavProps) {
               href="/app/student/today"
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all whitespace-nowrap ${
                 pathname === '/app/student/today'
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
@@ -107,7 +107,7 @@ export function TopNav({ profile, title }: TopNavProps) {
               href="/app/student/history"
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all whitespace-nowrap ${
                 pathname === '/app/student/history'
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
@@ -126,7 +126,7 @@ export function TopNav({ profile, title }: TopNavProps) {
               href="/app/personal"
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all whitespace-nowrap ${
                 pathname === '/app/personal'
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
@@ -139,7 +139,7 @@ export function TopNav({ profile, title }: TopNavProps) {
               href="/app/personal/students"
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all whitespace-nowrap ${
                 pathname === '/app/personal/students'
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >
@@ -152,7 +152,7 @@ export function TopNav({ profile, title }: TopNavProps) {
               href="/app/personal/exercises"
               className={`flex items-center gap-2 px-4 py-2.5 text-sm font-semibold rounded-xl transition-all whitespace-nowrap ${
                 pathname === '/app/personal/exercises'
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg'
+                  ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg'
                   : 'text-gray-700 hover:bg-gray-100'
               }`}
             >

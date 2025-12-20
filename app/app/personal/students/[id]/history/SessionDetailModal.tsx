@@ -63,7 +63,7 @@ export function SessionDetailModal({ session, currentUserId, currentUserRole, on
         <div className="sticky top-0 bg-white border-b p-6 z-10">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h2 className="text-xl font-bold text-gray-900">{session.template_name}</h2>
+              <h2 className="text-xl font-bold text-gray-900">{session.template?.name || 'Treino'}</h2>
               <p className="text-sm text-gray-600 mt-1">{formatDate(session.session_date)}</p>
             </div>
             <button
@@ -88,11 +88,11 @@ export function SessionDetailModal({ session, currentUserId, currentUserRole, on
               </div>
               <div className="text-xs text-green-800 mt-1">Concluído às</div>
             </div>
-            <div className="bg-purple-50 rounded-lg p-3">
-              <div className="text-sm text-purple-600 font-semibold">
+            <div className="bg-primary-50 rounded-lg p-3">
+              <div className="text-sm text-primary-600 font-semibold">
                 {formatDuration(session.duration_minutes)}
               </div>
-              <div className="text-xs text-purple-800 mt-1">Duração</div>
+              <div className="text-xs text-primary-800 mt-1">Duração</div>
             </div>
           </div>
         </div>

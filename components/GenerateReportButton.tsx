@@ -78,7 +78,7 @@ export function GenerateReportButton({ studentId, studentName, variant = 'defaul
       <>
         <button
           onClick={() => setIsOpen(true)}
-          className={`flex flex-col items-center justify-center gap-1 text-center text-xs bg-purple-50 hover:bg-purple-100 text-purple-700 py-2 rounded-lg font-semibold transition w-full ${className}`}
+          className={`flex flex-col items-center justify-center gap-1 text-center text-xs bg-primary-50 hover:bg-primary-100 text-primary-700 py-2 rounded-lg font-semibold transition w-full ${className}`}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -96,7 +96,7 @@ export function GenerateReportButton({ studentId, studentName, variant = 'defaul
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all ${className}`}
+        className={`flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-lg font-semibold text-sm shadow-md hover:shadow-lg transition-all ${className}`}
       >
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -114,7 +114,7 @@ export function GenerateReportButton({ studentId, studentName, variant = 'defaul
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full animate-fade-in">
             {/* Header */}
-            <div className="bg-gradient-to-r from-indigo-500 to-purple-500 rounded-t-2xl p-6">
+            <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-t-2xl p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xl font-bold text-white mb-1">Gerar Relatório Mensal</h3>
@@ -142,7 +142,7 @@ export function GenerateReportButton({ studentId, studentName, variant = 'defaul
                   value={selectedMonth}
                   onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
                   disabled={generating}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 font-medium disabled:opacity-50"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 font-medium disabled:opacity-50"
                 >
                   {months.map((month) => (
                     <option key={month.value} value={month.value}>
@@ -160,7 +160,7 @@ export function GenerateReportButton({ studentId, studentName, variant = 'defaul
                   value={selectedYear}
                   onChange={(e) => setSelectedYear(parseInt(e.target.value))}
                   disabled={generating}
-                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-gray-900 font-medium disabled:opacity-50"
+                  className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none text-gray-900 font-medium disabled:opacity-50"
                 >
                   {years.map((year) => (
                     <option key={year} value={year}>
@@ -201,7 +201,7 @@ export function GenerateReportButton({ studentId, studentName, variant = 'defaul
               <button
                 onClick={handleGenerate}
                 disabled={generating}
-                className="flex-1 px-4 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition disabled:opacity-50 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-bold shadow-md hover:shadow-lg transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {generating ? (
                   <>

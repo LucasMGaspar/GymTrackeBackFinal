@@ -26,6 +26,12 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
   const [editingStudent, setEditingStudent] = useState<Student | null>(null);
   const [deletingStudent, setDeletingStudent] = useState<Student | null>(null);
   const [sendingInvite, setSendingInvite] = useState<string | null>(null);
+  const [inviteLinkModal, setInviteLinkModal] = useState<{
+    open: boolean;
+    link: string;
+    studentName: string;
+    studentEmail: string;
+  }>({ open: false, link: '', studentName: '', studentEmail: '' });
 
   const filteredStudents = students.filter((student) => {
     const matchesSearch = 
@@ -110,11 +116,33 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
         body: JSON.stringify({ studentId: student.id }),
       });
 
-      if (!response.ok) throw new Error('Failed to send invite');
+      const data = await response.json();
 
-      showToast(`Convite enviado para ${student.student_email}! 📧`, 'success');
-    } catch (error) {
-      showToast('Erro ao enviar convite', 'error');
+      // Always show modal if we have a link, even if there was an "error"
+      if (data.inviteLink) {
+        setInviteLinkModal({
+          open: true,
+          link: data.inviteLink,
+          studentName: data.studentName || student.student_name,
+          studentEmail: data.studentEmail || student.student_email,
+        });
+        
+        if (data.isExistingUser) {
+          showToast('Link de login gerado! Copie e envie para o aluno 📋', 'success');
+        } else {
+          showToast('Link de convite gerado! Copie e envie para o aluno 📋', 'success');
+        }
+      } else if (!response.ok) {
+        // Only show error if we don't have a link
+        const errorMessage = data.error || 'Erro ao gerar link';
+        showToast(errorMessage, 'error');
+      } else {
+        showToast(`Convite enviado para ${student.student_email}! 📧`, 'success');
+      }
+    } catch (error: any) {
+      // Network or other errors
+      const errorMessage = error.message || 'Erro ao enviar convite. Verifique sua conexão.';
+      showToast(errorMessage, 'error');
     } finally {
       setSendingInvite(null);
     }
@@ -346,6 +374,101 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
             setDeletingStudent(null);
           }}
         />
+      )}
+
+      {/* Invite Link Modal */}
+      {inviteLinkModal.open && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-primary-500 to-primary-600 px-6 py-5 flex items-center justify-between rounded-t-2xl">
+              <div>
+                <h3 className="text-xl font-bold text-white">Link Gerado</h3>
+                <p className="text-sm text-white/90 mt-0.5">
+                  {inviteLinkModal.studentName} - {inviteLinkModal.studentEmail}
+                </p>
+              </div>
+              <button
+                onClick={() => setInviteLinkModal({ open: false, link: '', studentName: '', studentEmail: '' })}
+                className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <div className="flex items-start gap-3">
+                  <svg className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-blue-800 mb-1">Como usar este link:</p>
+                    <ul className="text-sm text-blue-700 space-y-1 list-disc list-inside">
+                      <li>Copie o link abaixo</li>
+                      <li>Envie para o aluno via WhatsApp, email ou mensagem</li>
+                      <li>O aluno deve clicar no link para acessar a conta</li>
+                      <li>Se o email já estiver cadastrado, o link levará para login</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Link Input */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Link de Acesso
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={inviteLinkModal.link}
+                    readOnly
+                    className="flex-1 px-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-sm font-mono text-gray-900 focus:outline-none"
+                  />
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(inviteLinkModal.link);
+                      showToast('Link copiado para a área de transferência! 📋', 'success');
+                    }}
+                    className="px-6 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-semibold transition-colors flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    Copiar
+                  </button>
+                </div>
+              </div>
+
+              {/* Quick Actions */}
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => {
+                    window.open(`mailto:${inviteLinkModal.studentEmail}?subject=Convite para FitCoach Pro&body=Olá!%0D%0A%0D%0AUse este link para criar sua conta:%0D%0A${encodeURIComponent(inviteLinkModal.link)}`, '_blank');
+                  }}
+                  className="flex-1 px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl font-semibold transition-colors flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Abrir Email
+                </button>
+                <button
+                  onClick={() => {
+                    setInviteLinkModal({ open: false, link: '', studentName: '', studentEmail: '' });
+                  }}
+                  className="flex-1 px-4 py-3 bg-primary-500 hover:bg-primary-600 text-white rounded-xl font-semibold transition-colors"
+                >
+                  Fechar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -178,18 +178,18 @@ export function TemplateModal({ studentId, weekday, template, exercises, onClose
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b sticky top-0 bg-white z-10">
+        <div className="bg-gradient-to-r from-primary-500 to-primary-600 px-6 py-5 flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-gray-900">
+            <h2 className="text-xl font-bold text-white">
               {template ? 'Editar Template' : 'Novo Template'}
             </h2>
-            <p className="text-sm text-gray-600">{WEEKDAY_LABELS[weekday]}</p>
+            <p className="text-sm text-white/90 mt-0.5">{WEEKDAY_LABELS[weekday]}</p>
           </div>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-white hover:bg-white/20 rounded-lg p-2 transition-colors"
             disabled={loading}
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -199,7 +199,7 @@ export function TemplateModal({ studentId, weekday, template, exercises, onClose
         </div>
 
         {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-6 space-y-6 overflow-y-auto flex-1">
           {/* General Error */}
           {errors.general && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-3">
@@ -218,8 +218,8 @@ export function TemplateModal({ studentId, weekday, template, exercises, onClose
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Ex: Treino A - Peito/Bíceps"
-              className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none ${
-                errors.name ? 'border-red-500' : 'border-gray-300'
+              className={`w-full px-4 py-3 border-2 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors ${
+                errors.name ? 'border-red-500' : 'border-gray-200 hover:border-gray-300'
               }`}
               disabled={loading}
             />
@@ -239,7 +239,7 @@ export function TemplateModal({ studentId, weekday, template, exercises, onClose
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Ex: Foco em hipertrofia, descanso de 90s entre séries..."
               rows={2}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none resize-none transition-colors hover:border-gray-300"
               disabled={loading}
             />
           </div>
@@ -253,10 +253,24 @@ export function TemplateModal({ studentId, weekday, template, exercises, onClose
               <button
                 type="button"
                 onClick={() => setShowExercisePicker(!showExercisePicker)}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                className="text-sm text-primary-600 hover:text-primary-700 font-semibold flex items-center gap-1.5 hover:bg-primary-50 px-3 py-1.5 rounded-lg transition-colors"
                 disabled={loading}
               >
-                {showExercisePicker ? '✕ Fechar' : '+ Adicionar Exercício'}
+                {showExercisePicker ? (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                    Fechar
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                    Adicionar Exercício
+                  </>
+                )}
               </button>
             </div>
 
@@ -290,51 +304,66 @@ export function TemplateModal({ studentId, weekday, template, exercises, onClose
 
             {/* Template Exercises */}
             {templateExercises.length === 0 ? (
-              <div className="text-center py-8 text-gray-500 text-sm">
-                Nenhum exercício adicionado. Clique em "+ Adicionar Exercício" acima.
+              <div className="text-center py-12 bg-gray-50 rounded-xl border-2 border-dashed border-gray-200">
+                <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                <p className="text-sm text-gray-500 mb-2">Nenhum exercício adicionado</p>
+                <p className="text-xs text-gray-400">Clique em "Adicionar Exercício" acima</p>
               </div>
             ) : (
               <div className="space-y-3">
                 {templateExercises.map((te, index) => (
-                  <div key={index} className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex items-start justify-between mb-3">
+                  <div key={index} className="p-4 bg-gradient-to-br from-gray-50 to-white rounded-xl border border-gray-200 hover:border-primary-200 transition-all">
+                    <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">
-                        <div className="font-medium text-gray-900">{te.exercise_name}</div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <div className="w-6 h-6 bg-primary-100 text-primary-700 rounded-lg flex items-center justify-center text-xs font-bold">
+                            {index + 1}
+                          </div>
+                          <div className="font-semibold text-gray-900">{te.exercise_name}</div>
+                        </div>
                       </div>
                       <div className="flex gap-1">
                         <button
                           type="button"
                           onClick={() => handleMoveUp(index)}
                           disabled={index === 0 || loading}
-                          className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-30"
+                          className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                           title="Mover para cima"
                         >
-                          ↑
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                          </svg>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleMoveDown(index)}
                           disabled={index === templateExercises.length - 1 || loading}
-                          className="p-1 text-gray-600 hover:text-gray-900 disabled:opacity-30"
+                          className="p-2 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                           title="Mover para baixo"
                         >
-                          ↓
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
                         </button>
                         <button
                           type="button"
                           onClick={() => handleRemoveExercise(index)}
-                          className="p-1 text-red-600 hover:text-red-700"
+                          className="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                           disabled={loading}
                           title="Remover"
                         >
-                          ✕
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
                         </button>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1">Séries Alvo</label>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">Séries Alvo</label>
                         <input
                           type="number"
                           value={te.target_sets}
@@ -342,18 +371,18 @@ export function TemplateModal({ studentId, weekday, template, exercises, onClose
                             updateExercise(index, 'target_sets', parseInt(e.target.value) || 0)
                           }
                           min="1"
-                          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none"
+                          className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors hover:border-gray-300"
                           disabled={loading}
                         />
                       </div>
                       <div>
-                        <label className="block text-xs text-gray-600 mb-1">Reps Alvo</label>
+                        <label className="block text-xs font-semibold text-gray-700 mb-1.5">Reps Alvo</label>
                         <input
                           type="text"
                           value={te.target_reps}
                           onChange={(e) => updateExercise(index, 'target_reps', e.target.value)}
                           placeholder="10 ou 12/10/8"
-                          className="w-full px-3 py-2 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 outline-none"
+                          className="w-full px-3 py-2.5 border-2 border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-colors hover:border-gray-300"
                           disabled={loading}
                         />
                       </div>
@@ -365,21 +394,36 @@ export function TemplateModal({ studentId, weekday, template, exercises, onClose
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 pt-4 border-t">
+          <div className="flex gap-3 pt-4 border-t border-gray-200 sticky bottom-0 bg-white">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
+              className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-xl text-gray-700 hover:bg-gray-50 hover:border-gray-300 font-semibold transition-colors"
               disabled={loading}
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition disabled:opacity-50"
+              className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white rounded-xl font-semibold shadow-lg shadow-primary-500/25 hover:shadow-xl transition-all disabled:opacity-50 flex items-center justify-center gap-2"
               disabled={loading}
             >
-              {loading ? 'Salvando...' : 'Salvar Template'}
+              {loading ? (
+                <>
+                  <svg className="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Salvar Template
+                </>
+              )}
             </button>
           </div>
         </form>

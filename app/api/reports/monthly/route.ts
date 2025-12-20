@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const { data: profile } = await supabase
       .from('profiles')
       .select('role, name')
-      .eq('user_id', user.id)
+      .eq('id', user.id)
       .single();
 
     if (profile?.role !== 'personal') {
@@ -47,22 +47,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Student not found' }, { status: 404 });
     }
 
+    // Check if student is linked to a user
+    if (!student.student_user_id) {
+      return NextResponse.json(
+        { error: 'Aluno ainda não aceitou o convite. Não há treinos para gerar relatório.' },
+        { status: 400 }
+      );
+    }
+
     // Calculate date range
     const periodStart = new Date(year, month - 1, 1);
     const periodEnd = new Date(year, month, 0);
     periodEnd.setHours(23, 59, 59, 999);
 
     // Fetch sessions for the month
+    // Use student_user_id (workout_sessions uses student_user_id, not student_id)
     const { data: sessions, error: sessionsError } = await supabase
       .from('workout_sessions')
       .select(`
         *,
+        template:workout_templates(*),
         workout_session_exercises(
           *,
           exercise:exercises(*)
         )
       `)
-      .eq('student_id', student_id)
+      .eq('student_user_id', student.student_user_id)
       .eq('status', 'completed')
       .gte('session_date', periodStart.toISOString().split('T')[0])
       .lte('session_date', periodEnd.toISOString().split('T')[0])

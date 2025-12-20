@@ -32,6 +32,41 @@ export async function GET(request: Request) {
     }
 
     console.log('👤 User ID:', user.id);
+    console.log('📧 User Email:', user.email);
+
+    // Link student if email matches an invited student
+    // (This ensures linking even if the trigger didn't fire)
+    if (user.email) {
+      const { data: studentToLink, error: linkError } = await supabase
+        .from('students')
+        .select('id, student_name, status')
+        .eq('student_email', user.email.toLowerCase().trim())
+        .eq('status', 'invited')
+        .is('student_user_id', null)
+        .limit(1)
+        .maybeSingle();
+
+      if (studentToLink && !linkError) {
+        console.log('🔗 Vinculando aluno ao usuário...', studentToLink.id);
+        const { error: updateError } = await supabase
+          .from('students')
+          .update({
+            student_user_id: user.id,
+            status: 'active',
+          })
+          .eq('id', studentToLink.id);
+
+        if (updateError) {
+          console.error('❌ Erro ao vincular aluno:', updateError);
+        } else {
+          console.log('✅ Aluno vinculado com sucesso!');
+        }
+      } else if (linkError) {
+        console.log('⚠️ Erro ao buscar aluno para vincular:', linkError);
+      } else {
+        console.log('ℹ️ Nenhum aluno pendente encontrado para este email');
+      }
+    }
 
     // Check/create profile
     const { data: profile } = await supabase

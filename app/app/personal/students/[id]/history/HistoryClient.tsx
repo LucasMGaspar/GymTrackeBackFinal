@@ -134,7 +134,7 @@ export function HistoryClient({ student, sessions, currentUserId, currentUserRol
             <div className="text-xs text-gray-600 mt-1">Aderência</div>
           </div>
           <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">{stats.avgExercises}</div>
+            <div className="text-2xl font-bold text-primary-600">{stats.avgExercises}</div>
             <div className="text-xs text-gray-600 mt-1">Ex/Treino</div>
           </div>
           <div className="bg-white rounded-lg shadow-sm p-4 text-center">
@@ -152,7 +152,7 @@ export function HistoryClient({ student, sessions, currentUserId, currentUserRol
           onClick={() => setFilterPeriod('7days')}
           className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
             filterPeriod === '7days'
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+              ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md'
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
@@ -162,7 +162,7 @@ export function HistoryClient({ student, sessions, currentUserId, currentUserRol
           onClick={() => setFilterPeriod('14days')}
           className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
             filterPeriod === '14days'
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+              ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md'
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
@@ -172,7 +172,7 @@ export function HistoryClient({ student, sessions, currentUserId, currentUserRol
           onClick={() => setFilterPeriod('30days')}
           className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
             filterPeriod === '30days'
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+              ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md'
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
@@ -182,7 +182,7 @@ export function HistoryClient({ student, sessions, currentUserId, currentUserRol
           onClick={() => setFilterPeriod('all')}
           className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
             filterPeriod === 'all'
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
+              ? 'bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-md'
               : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
           }`}
         >
@@ -210,10 +210,10 @@ export function HistoryClient({ student, sessions, currentUserId, currentUserRol
                 className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden text-left hover:shadow-lg hover:border-indigo-100 transition-all duration-200"
               >
                 {/* Header com gradiente */}
-                <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-3">
+                <div className="bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-3">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h3 className="font-bold text-white text-lg">{session.template_name}</h3>
+                      <h3 className="font-bold text-white text-lg">{session.template?.name || 'Treino'}</h3>
                       <p className="text-sm text-white opacity-90 mt-1">
                         {formatDate(session.session_date)}
                       </p>
@@ -241,7 +241,7 @@ export function HistoryClient({ student, sessions, currentUserId, currentUserRol
                 <div className="p-5">
                   <div className="flex items-center gap-4 mb-3">
                     <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                      <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                       </svg>
                       {session.workout_session_exercises.length} exercícios
