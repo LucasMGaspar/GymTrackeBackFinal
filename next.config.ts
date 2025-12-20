@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  webpack: (config, { isServer }) => {
+  webpack: (config, { isServer, webpack }) => {
     if (isServer) {
       // Exclude jsPDF from server-side bundle to avoid CSS file access during build
       config.externals = config.externals || [];
@@ -24,6 +24,19 @@ const nextConfig: NextConfig = {
           },
         ];
       }
+      
+      // Ignore jsPDF during static analysis
+      config.plugins = config.plugins || [];
+      config.plugins.push(
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^jspdf$/,
+          contextRegExp: /node_modules/,
+        }),
+        new webpack.IgnorePlugin({
+          resourceRegExp: /^jspdf-autotable$/,
+          contextRegExp: /node_modules/,
+        })
+      );
     }
     return config;
   },

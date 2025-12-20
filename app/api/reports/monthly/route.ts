@@ -6,16 +6,12 @@ import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Lazy load the entire module to avoid any static analysis
-let generateMonthlyReportFn: any = null;
-
+// Use Function constructor to prevent static analysis during build
 async function getGenerateMonthlyReport() {
-  if (!generateMonthlyReportFn) {
-    // Use dynamic import with a function to ensure it's truly lazy
-    const module = await import('@/lib/reports/generateMonthlyReport');
-    generateMonthlyReportFn = module.generateMonthlyReport;
-  }
-  return generateMonthlyReportFn;
+  // This prevents webpack from analyzing the import during build
+  const dynamicImport = new Function('specifier', 'return import(specifier)');
+  const module = await dynamicImport('@/lib/reports/generateMonthlyReport');
+  return module.generateMonthlyReport;
 }
 
 export async function POST(request: Request) {

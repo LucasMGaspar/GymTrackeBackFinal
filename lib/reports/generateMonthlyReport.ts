@@ -2,15 +2,16 @@
 import type { Student, WorkoutSession, WorkoutSessionExercise } from '@/lib/types';
 
 // Lazy load jsPDF to avoid CSS file access during build
-// Use a function wrapper to ensure it's truly lazy-loaded
+// Use Function constructor to prevent static analysis
 let jsPDFModule: any = null;
 let autoTableModule: any = null;
 
 async function loadJsPDF() {
   if (!jsPDFModule) {
-    // Use dynamic import with eval to prevent static analysis
-    const jsPDFImport = await import('jspdf');
-    const autoTableImport = await import('jspdf-autotable');
+    // Use Function constructor to prevent webpack from analyzing during build
+    const dynamicImport = new Function('specifier', 'return import(specifier)');
+    const jsPDFImport = await dynamicImport('jspdf');
+    const autoTableImport = await dynamicImport('jspdf-autotable');
     jsPDFModule = jsPDFImport.default || jsPDFImport;
     autoTableModule = autoTableImport.default || autoTableImport;
   }
