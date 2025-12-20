@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { Dumbbell, Mail, ArrowRight, Sparkles, Shield, Zap, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
 
@@ -22,11 +23,29 @@ function translateError(error: string): string {
   return error;
 }
 
-export default function LoginPage() {
+function LoginForm() {
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'warning'; text: string } | null>(null);
   const [cooldown, setCooldown] = useState(0);
+
+  // Check for error in URL params
+  useEffect(() => {
+    const error = searchParams.get('error');
+    if (error) {
+      const errorMessages: Record<string, string> = {
+        'auth_failed': 'Falha na autenticação. Tente novamente.',
+        'no_code': 'Link inválido. Solicite um novo link mágico.',
+        'no_user': 'Usuário não encontrado.',
+        'unexpected_error': 'Erro inesperado. Tente novamente.',
+      };
+      setMessage({
+        type: 'error',
+        text: errorMessages[error] || decodeURIComponent(error),
+      });
+    }
+  }, [searchParams]);
 
   // Cooldown timer
   useEffect(() => {
@@ -103,13 +122,120 @@ export default function LoginPage() {
     }
   };
 
+  const isDisabled = loading || cooldown > 0;
+
+  return (
+    <div className="card shadow-soft-xl">
+      <div className="text-center mb-8">
+        <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
+          Bem-vindo de volta!
+        </h2>
+        <p className="text-gray-500">
+          Entre com seu email para acessar sua conta
+        </p>
+      </div>
+
+      <form onSubmit={handleLogin} className="space-y-5">
+        <div>
+          <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
+            Email
+          </label>
+          <div className="relative">
+            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+              <Mail className="h-5 w-5 text-gray-400" />
+            </div>
+            <input
+              id="email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="seu@email.com"
+              className="input pl-12"
+              disabled={loading}
+            />
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          disabled={isDisabled}
+          className="btn-primary w-full py-4 text-base"
+        >
+          {loading ? (
+            <>
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <span>Enviando...</span>
+            </>
+          ) : cooldown > 0 ? (
+            <>
+              <Clock className="w-5 h-5" />
+              <span>Aguarde {cooldown}s</span>
+            </>
+          ) : (
+            <>
+              <span>Enviar link mágico</span>
+              <ArrowRight className="w-5 h-5" />
+            </>
+          )}
+        </button>
+      </form>
+
+      {message && (
+        <div
+          className={`mt-6 p-4 rounded-xl flex items-start gap-3 animate-slide-up ${
+            message.type === 'success'
+              ? 'bg-success-50 text-success-700 border border-success-200'
+              : message.type === 'warning'
+              ? 'bg-amber-50 text-amber-700 border border-amber-200'
+              : 'bg-red-50 text-red-700 border border-red-200'
+          }`}
+        >
+          {message.type === 'success' ? (
+            <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
+          ) : message.type === 'warning' ? (
+            <Clock className="w-5 h-5 mt-0.5 flex-shrink-0" />
+          ) : (
+            <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+          )}
+          <p className="text-sm font-medium">{message.text}</p>
+        </div>
+      )}
+
+      <div className="mt-8 pt-6 border-t border-gray-100">
+        <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
+          <Shield className="w-4 h-4" />
+          <p>Acesso seguro e sem senha via link mágico</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function LoginFormSkeleton() {
+  return (
+    <div className="card shadow-soft-xl animate-pulse">
+      <div className="text-center mb-8">
+        <div className="h-8 bg-gray-200 rounded w-2/3 mx-auto mb-2"></div>
+        <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+      </div>
+      <div className="space-y-5">
+        <div>
+          <div className="h-4 bg-gray-200 rounded w-16 mb-2"></div>
+          <div className="h-12 bg-gray-200 rounded-xl"></div>
+        </div>
+        <div className="h-14 bg-gray-200 rounded-xl"></div>
+      </div>
+    </div>
+  );
+}
+
+export default function LoginPage() {
   const features = [
     { icon: Zap, text: 'Acesso instantâneo' },
     { icon: Shield, text: 'Seguro e sem senha' },
     { icon: Sparkles, text: 'Experiência premium' },
   ];
-
-  const isDisabled = loading || cooldown > 0;
 
   return (
     <div className="min-h-screen mesh-gradient flex">
@@ -167,90 +293,9 @@ export default function LoginPage() {
             <span className="text-2xl font-bold text-gray-900">FitPro</span>
           </div>
 
-          <div className="card shadow-soft-xl">
-            <div className="text-center mb-8">
-              <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 mb-2">
-                Bem-vindo de volta!
-              </h2>
-              <p className="text-gray-500">
-                Entre com seu email para acessar sua conta
-              </p>
-            </div>
-
-            <form onSubmit={handleLogin} className="space-y-5">
-              <div>
-                <label htmlFor="email" className="block text-sm font-semibold text-gray-700 mb-2">
-                  Email
-                </label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <Mail className="h-5 w-5 text-gray-400" />
-                  </div>
-                  <input
-                    id="email"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    placeholder="seu@email.com"
-                    className="input pl-12"
-                    disabled={loading}
-                  />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                disabled={isDisabled}
-                className="btn-primary w-full py-4 text-base"
-              >
-                {loading ? (
-                  <>
-                    <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                    <span>Enviando...</span>
-                  </>
-                ) : cooldown > 0 ? (
-                  <>
-                    <Clock className="w-5 h-5" />
-                    <span>Aguarde {cooldown}s</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Enviar link mágico</span>
-                    <ArrowRight className="w-5 h-5" />
-                  </>
-                )}
-              </button>
-            </form>
-
-            {message && (
-              <div
-                className={`mt-6 p-4 rounded-xl flex items-start gap-3 animate-slide-up ${
-                  message.type === 'success'
-                    ? 'bg-success-50 text-success-700 border border-success-200'
-                    : message.type === 'warning'
-                    ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                    : 'bg-red-50 text-red-700 border border-red-200'
-                }`}
-              >
-                {message.type === 'success' ? (
-                  <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                ) : message.type === 'warning' ? (
-                  <Clock className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                ) : (
-                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
-                )}
-                <p className="text-sm font-medium">{message.text}</p>
-              </div>
-            )}
-
-            <div className="mt-8 pt-6 border-t border-gray-100">
-              <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
-                <Shield className="w-4 h-4" />
-                <p>Acesso seguro e sem senha via link mágico</p>
-              </div>
-            </div>
-          </div>
+          <Suspense fallback={<LoginFormSkeleton />}>
+            <LoginForm />
+          </Suspense>
 
           {/* Trust badges */}
           <div className="mt-8 flex items-center justify-center gap-6 text-sm text-gray-400">
