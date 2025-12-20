@@ -1,9 +1,18 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'Personal Trainer SaaS',
-  description: 'Gerenciamento de treinos para personal trainers e alunos',
+  title: 'FitPro | Personal Trainer App',
+  description: 'Plataforma profissional de gerenciamento de treinos para personal trainers e alunos',
+  keywords: ['personal trainer', 'treino', 'academia', 'fitness', 'exercícios'],
+  authors: [{ name: 'FitPro' }],
+};
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: '#4f46e5',
 };
 
 export default function RootLayout({
@@ -13,7 +22,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
-      <body className="antialiased">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="antialiased min-h-screen">
         {children}
       </body>
     </html>
