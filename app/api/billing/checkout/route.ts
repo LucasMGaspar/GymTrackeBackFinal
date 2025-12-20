@@ -124,7 +124,7 @@ export async function POST(request: NextRequest) {
       payer_email: userEmail,
     });
 
-    if (!preapprovalResult.success) {
+    if (!preapprovalResult.success || !preapprovalResult.data) {
       console.error('[Checkout] Failed to create preapproval:', preapprovalResult.error);
       return NextResponse.json(
         { error: 'Failed to create checkout session', details: preapprovalResult.error },
@@ -138,7 +138,7 @@ export async function POST(request: NextRequest) {
       plan_id: plan.id,
       status: plan.trial_days ? 'trialing' : 'pending',
       mp_preapproval_id: preapprovalResult.data.id,
-      mp_customer_id: customerResult.success ? customerResult.data.id : null,
+      mp_customer_id: customerResult.success && customerResult.data ? customerResult.data.id : null,
       current_period_start: plan.trial_days ? now : null,
       current_period_end: plan.trial_days 
         ? new Date(now.getTime() + plan.trial_days * 24 * 60 * 60 * 1000)
@@ -157,9 +157,9 @@ export async function POST(request: NextRequest) {
 
     if (subError) {
       console.error('[Checkout] Failed to create subscription:', subError);
-      // Try to cancel preapproval if subscription creation failed
-      if (preapprovalResult.data.id) {
-        await createPreApproval({} as any); // Will be handled by webhook cleanup
+      // Preapproval will be cleaned up by webhook or manual cancellation
+      if (preapprovalResult.data?.id) {
+        console.warn('[Checkout] Subscription creation failed, preapproval may need manual cleanup:', preapprovalResult.data.id);
       }
       return NextResponse.json(
         { error: 'Failed to create subscription record' },
@@ -170,7 +170,15 @@ export async function POST(request: NextRequest) {
     // Return checkout URL
     const checkoutUrl = process.env.NODE_ENV === 'production'
       ? preapprovalResult.data.init_point
-      : preapprovalResult.data.sandbox_init_point || preapprovalResult.data.init_point;
+      : preapprovalResult.data.sandbox_init_point || preapprovalResult.data.init_point || '';
+
+    if (!checkoutUrl) {
+      console.error('[Checkout] No checkout URL available');
+      return NextResponse.json(
+        { error: 'Failed to generate checkout URL' },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       success: true,

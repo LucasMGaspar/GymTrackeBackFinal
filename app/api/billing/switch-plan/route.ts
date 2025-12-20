@@ -125,7 +125,7 @@ export async function POST(request: NextRequest) {
         payer_email: userEmail,
       });
 
-      if (!preapprovalResult.success) {
+      if (!preapprovalResult.success || !preapprovalResult.data) {
         return NextResponse.json(
           { error: 'Failed to create new subscription', details: preapprovalResult.error },
           { status: 500 }
@@ -174,7 +174,14 @@ export async function POST(request: NextRequest) {
 
       const checkoutUrl = process.env.NODE_ENV === 'production'
         ? preapprovalResult.data.init_point
-        : preapprovalResult.data.sandbox_init_point || preapprovalResult.data.init_point;
+        : preapprovalResult.data.sandbox_init_point || preapprovalResult.data.init_point || '';
+
+      if (!checkoutUrl) {
+        return NextResponse.json(
+          { error: 'Failed to generate checkout URL' },
+          { status: 500 }
+        );
+      }
 
       return NextResponse.json({
         success: true,
