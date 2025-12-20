@@ -6,16 +6,46 @@ Para que o upload de fotos funcione, você precisa configurar o bucket no Supaba
 
 ### 1. Criar o Bucket no Supabase
 
-1. Acesse o **Supabase Dashboard**
-2. Vá para **Storage** no menu lateral
-3. Clique em **"New bucket"** ou **"Create a new bucket"**
-4. Configure assim:
-   - **Nome do bucket:** `assessment-photos` (EXATO, case-sensitive)
-   - **Public bucket:** ❌ **Desmarcado** (privado)
-   - **File size limit:** `5 MB` (ou deixe padrão)
-   - **Allowed MIME types:** `image/jpeg, image/png, image/webp` (opcional, mas recomendado)
+#### Passo a Passo Detalhado:
 
-5. Clique em **"Create bucket"**
+1. **Acesse o Supabase Dashboard**
+   - Vá para [https://supabase.com/dashboard](https://supabase.com/dashboard)
+   - Faça login na sua conta
+   - Selecione o projeto do GymTrack
+
+2. **Abra a seção Storage**
+   - No menu lateral esquerdo, procure por **"Storage"** (ícone de pasta/arquivo)
+   - Clique em **"Storage"**
+
+3. **Criar novo bucket**
+   - Você verá a lista de buckets existentes (se houver)
+   - Procure pelo botão **"New bucket"** ou **"Create a new bucket"** (geralmente no topo direito ou no centro se estiver vazio)
+   - Clique nele
+
+4. **Configurar o bucket**
+   Preencha o formulário com as seguintes informações:
+   
+   - **Name:** Digite exatamente `assessment-photos` (importante: case-sensitive)
+   
+   - **Public bucket:** ❌ **NÃO marque** (deixe desmarcado)
+     - Isso torna o bucket privado, garantindo segurança
+   
+   - **File size limit:** 
+     - Se houver esse campo, digite `5242880` (5MB em bytes) ou `5`
+     - Ou selecione a opção "5 MB" se houver dropdown
+     - Se não houver esse campo, pode deixar padrão (o limite será validado no código)
+   
+   - **Allowed MIME types:** (Opcional, mas recomendado)
+     - Se houver esse campo, digite: `image/jpeg, image/png, image/webp`
+     - Ou deixe vazio se não houver
+
+5. **Criar o bucket**
+   - Clique no botão **"Create bucket"** ou **"Save"**
+   - Aguarde a confirmação de criação
+
+6. **Verificar se foi criado**
+   - O bucket `assessment-photos` deve aparecer na lista de buckets
+   - Você deve conseguir vê-lo na lista
 
 ### 2. Executar as Políticas de Storage
 
