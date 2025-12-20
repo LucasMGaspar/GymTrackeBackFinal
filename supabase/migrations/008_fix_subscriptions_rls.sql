@@ -33,3 +33,4 @@ COMMENT ON POLICY "Personal trainers can insert their own subscriptions" ON publ
 COMMENT ON POLICY "Personal trainers can update their own subscriptions" ON public.subscriptions IS 
   'Allows personal trainers to update their own subscriptions (e.g., cancel, change plan)';
 
+

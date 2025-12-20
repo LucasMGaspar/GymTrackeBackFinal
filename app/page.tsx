@@ -73,14 +73,14 @@ export default function Home() {
                 href="/plans"
                 className="bg-primary-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-primary-600 transition-all shadow-lg hover:shadow-xl flex items-center justify-center transform hover:scale-105"
               >
-                Ver Planos
+                Sou Personal Trainer
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Link>
               <Link
                 href="/login"
                 className="bg-white/10 backdrop-blur-sm border-2 border-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition-all"
               >
-                Fazer Login
+                Sou Aluno
               </Link>
             </div>
             <div className="flex items-center justify-center gap-8 text-sm text-dark-300">
@@ -389,7 +389,7 @@ export default function Home() {
             href="/plans"
             className="bg-primary-500 text-white px-10 py-5 rounded-xl font-semibold text-lg hover:bg-primary-600 transition-all shadow-xl hover:shadow-2xl inline-flex items-center transform hover:scale-105"
           >
-            Ver Planos e Preços
+            Criar Conta de Personal Trainer
             <ArrowRight className="w-5 h-5 ml-2" />
           </Link>
           <p className="text-dark-300 text-sm mt-6">

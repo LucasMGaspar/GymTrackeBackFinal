@@ -383,3 +383,4 @@ npm test -- lib/billing/__tests__
 - Eventos são armazenados para auditoria e debug
 - Downgrade requer job/cron para aplicar ao fim do período (não implementado ainda)
 
+

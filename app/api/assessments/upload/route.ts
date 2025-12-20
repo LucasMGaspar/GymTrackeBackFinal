@@ -110,26 +110,35 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Obter URL pública (funciona mesmo com bucket privado, mas requer políticas RLS)
-    const { data: { publicUrl } } = supabase.storage
+    // Para bucket privado, precisamos gerar uma signed URL
+    // Válida por 1 ano (31536000 segundos) para que não expire rapidamente
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
       .from('assessment-photos')
-      .getPublicUrl(filePath);
+      .createSignedUrl(filePath, 31536000); // 1 ano
 
-    // Se o bucket for privado, o getPublicUrl ainda retorna a URL, mas ela só funciona
-    // se as políticas RLS permitirem acesso. Se necessário, podemos usar signed URLs:
-    // const { data: { signedUrl } } = await supabase.storage
-    //   .from('assessment-photos')
-    //   .createSignedUrl(filePath, 3600); // válida por 1 hora
-    // Mas signed URLs expiram, então publicUrl é melhor se as políticas RLS permitirem
+    if (signedUrlError || !signedUrlData?.signedUrl) {
+      console.error('[Upload] Error creating signed URL:', signedUrlError);
+      // Fallback para public URL (caso o bucket seja público ou políticas permitam)
+      const { data: { publicUrl } } = supabase.storage
+        .from('assessment-photos')
+        .getPublicUrl(filePath);
+      
+      console.log('[Upload] Using public URL as fallback:', publicUrl);
+      
+      return NextResponse.json({
+        url: publicUrl,
+        path: filePath,
+      });
+    }
 
     console.log('[Upload] File uploaded successfully:', {
       filePath,
-      publicUrl,
+      signedUrl: signedUrlData.signedUrl,
       userId: user.id,
     });
 
     return NextResponse.json({
-      url: publicUrl,
+      url: signedUrlData.signedUrl,
       path: filePath,
     });
   } catch (error: any) {

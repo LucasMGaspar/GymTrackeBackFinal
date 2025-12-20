@@ -68,3 +68,4 @@ FROM public.students
 WHERE status = 'invited'
 ORDER BY created_at DESC;
 
+

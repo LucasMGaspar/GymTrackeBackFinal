@@ -199,3 +199,4 @@ O código agora inclui logs detalhados em cada etapa:
 
 **Verifique os logs do Vercel para identificar exatamente onde está falhando!**
 
+

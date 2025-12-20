@@ -320,3 +320,4 @@ Após seguir todos os passos, seu sistema de billing estará configurado e pront
 
 Para mais detalhes sobre como usar o sistema, consulte o [README_BILLING.md](./README_BILLING.md).
 
+

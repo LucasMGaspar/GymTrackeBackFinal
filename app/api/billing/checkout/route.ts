@@ -188,17 +188,39 @@ export async function POST(request: NextRequest) {
       status: plan.trial_days ? 'trialing' : 'pending',
       mp_preapproval_id: preapprovalResult.data.id,
       mp_customer_id: customerResult.success && customerResult.data ? customerResult.data.id : null,
-      current_period_start: plan.trial_days ? now : null,
+      current_period_start: plan.trial_days ? now.toISOString() : null,
       current_period_end: plan.trial_days 
-        ? new Date(now.getTime() + plan.trial_days * 24 * 60 * 60 * 1000)
+        ? new Date(now.getTime() + plan.trial_days * 24 * 60 * 60 * 1000).toISOString()
         : null,
-      trial_start: plan.trial_days ? now : null,
+      trial_start: plan.trial_days ? now.toISOString() : null,
       trial_end: plan.trial_days 
-        ? new Date(now.getTime() + plan.trial_days * 24 * 60 * 60 * 1000)
+        ? new Date(now.getTime() + plan.trial_days * 24 * 60 * 60 * 1000).toISOString()
         : null,
     };
 
-    console.log('[Checkout] Creating subscription record:', subscriptionData);
+    console.log('[Checkout] Creating subscription record:', {
+      ...subscriptionData,
+      personal_id: user.id,
+      plan_id: plan.id,
+    });
+    
+    // Verify RLS policies before insert
+    const { data: profileCheck } = await supabase
+      .from('profiles')
+      .select('id, role')
+      .eq('id', user.id)
+      .single();
+    
+    if (!profileCheck || profileCheck.role !== 'personal') {
+      console.error('[Checkout] Profile check failed:', profileCheck);
+      return NextResponse.json(
+        { 
+          error: 'Profile verification failed',
+          details: 'User profile not found or not a personal trainer'
+        },
+        { status: 403 }
+      );
+    }
     
     const { data: subscription, error: subError } = await supabase
       .from('subscriptions')
@@ -213,7 +235,22 @@ export async function POST(request: NextRequest) {
         message: subError.message,
         details: subError.details,
         hint: subError.hint,
+        subscriptionData,
       });
+      
+      // Check if it's an RLS policy error
+      if (subError.code === '42501' || subError.message?.includes('permission denied') || subError.message?.includes('policy')) {
+        return NextResponse.json(
+          { 
+            error: 'Permission denied: RLS policy error',
+            details: subError.message,
+            hint: 'Please ensure migration 008_fix_subscriptions_rls.sql has been executed. The INSERT policy for subscriptions table may be missing.',
+            code: subError.code,
+          },
+          { status: 403 }
+        );
+      }
+      
       // Preapproval will be cleaned up by webhook or manual cancellation
       if (preapprovalResult.data?.id) {
         console.warn('[Checkout] Subscription creation failed, preapproval may need manual cleanup:', preapprovalResult.data.id);
@@ -222,7 +259,8 @@ export async function POST(request: NextRequest) {
         { 
           error: 'Failed to create subscription record',
           details: subError.message,
-          hint: subError.hint || 'Check if the subscriptions table exists and RLS policies are correct'
+          hint: subError.hint || 'Check if the subscriptions table exists and RLS policies are correct',
+          code: subError.code,
         },
         { status: 500 }
       );

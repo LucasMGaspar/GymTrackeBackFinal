@@ -64,3 +64,4 @@ SELECT
 FROM public.students
 WHERE LOWER(TRIM(student_email)) = LOWER(TRIM('hugomatheus210900@gmail.com'));
 
+
