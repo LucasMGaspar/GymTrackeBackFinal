@@ -75,3 +75,5 @@ AND ws.session_date >= CURRENT_DATE - INTERVAL '14 days'
 GROUP BY ws.id, ws.session_date, ws.status, ws.completed_at, wt.name
 ORDER BY ws.session_date DESC, ws.completed_at DESC;
 
+
+

@@ -1,9 +1,18 @@
 import { createClient } from '@/lib/supabase/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { generateMonthlyReport } from '@/lib/reports/generateMonthlyReport';
+import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.read.maxRequests,
+      RATE_LIMITS.read.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const body = await request.json();
 

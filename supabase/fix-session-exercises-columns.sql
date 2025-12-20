@@ -73,3 +73,5 @@ NOTIFY pgrst, 'reload schema';
 -- 2. Recarregue a página do aplicativo
 -- 3. Se o erro persistir, aguarde 1-2 minutos para o cache atualizar
 
+
+

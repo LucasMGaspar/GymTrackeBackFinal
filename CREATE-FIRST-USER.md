@@ -208,3 +208,5 @@ Se nenhum método funcionar:
 4. Tente criar o usuário diretamente no Supabase Dashboard primeiro
 
 
+
+

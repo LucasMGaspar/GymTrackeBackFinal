@@ -44,3 +44,5 @@ FROM pg_policies
 WHERE tablename = 'exercises'
   AND policyname = 'Students can view exercises in their workouts';
 
+
+

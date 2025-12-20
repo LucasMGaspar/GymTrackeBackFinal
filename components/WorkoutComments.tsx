@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/components/ui/Toast';
 import type { WorkoutComment } from '@/lib/types';
+import { sanitizeWithLineBreaks } from '@/lib/security/sanitize';
 
 interface Props {
   sessionId: string;
@@ -200,7 +201,9 @@ export function WorkoutComments({ sessionId, currentUserId, currentUserRole, onC
                   </button>
                 )}
               </div>
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">{comment.content}</p>
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                {sanitizeWithLineBreaks(comment.content)}
+              </p>
             </div>
           ))}
         </div>
