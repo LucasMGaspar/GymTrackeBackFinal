@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, Suspense } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { Dumbbell, Mail, ArrowRight, Sparkles, Shield, Zap, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+import { Dumbbell, Mail, ArrowRight, Sparkles, Shield, Zap, CheckCircle2, Clock, AlertCircle, Loader2 } from 'lucide-react';
 
 // Traduz mensagens de erro do Supabase
 function translateError(error: string): string {
@@ -25,27 +25,130 @@ function translateError(error: string): string {
 
 function LoginForm() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error' | 'warning'; text: string } | null>(null);
   const [cooldown, setCooldown] = useState(0);
 
-  // Check for error in URL params
+  // Handle magic link tokens in URL (Supabase redirects here with hash fragment or code)
   useEffect(() => {
-    const error = searchParams.get('error');
-    if (error) {
-      const errorMessages: Record<string, string> = {
-        'auth_failed': 'Falha na autenticação. Tente novamente.',
-        'no_code': 'Link inválido. Solicite um novo link mágico.',
-        'no_user': 'Usuário não encontrado.',
-        'unexpected_error': 'Erro inesperado. Tente novamente.',
-      };
-      setMessage({
-        type: 'error',
-        text: errorMessages[error] || decodeURIComponent(error),
-      });
-    }
-  }, [searchParams]);
+    const handleAuthCallback = async () => {
+      const supabase = createClient();
+      
+      // Check if there's a code in the URL (PKCE flow)
+      const code = searchParams.get('code');
+      if (code) {
+        setVerifying(true);
+        try {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (error) throw error;
+          
+          if (data.user) {
+            // Check/create profile
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', data.user.id)
+              .single();
+            
+            if (!profile) {
+              await supabase.from('profiles').insert({
+                id: data.user.id,
+                role: 'student',
+                name: data.user.email?.split('@')[0] || 'User',
+              });
+            }
+            
+            const redirectPath = profile?.role === 'personal' 
+              ? '/app/personal' 
+              : '/app/student/today';
+            
+            router.push(redirectPath);
+            return;
+          }
+        } catch (err: any) {
+          console.error('Auth callback error:', err);
+          setMessage({
+            type: 'error',
+            text: 'Erro ao verificar link. Tente solicitar um novo.',
+          });
+        } finally {
+          setVerifying(false);
+        }
+      }
+
+      // Check for hash fragment (implicit flow)
+      if (typeof window !== 'undefined' && window.location.hash) {
+        setVerifying(true);
+        try {
+          const { data, error } = await supabase.auth.getSession();
+          if (data.session) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('role')
+              .eq('id', data.session.user.id)
+              .single();
+            
+            if (!profile) {
+              await supabase.from('profiles').insert({
+                id: data.session.user.id,
+                role: 'student',
+                name: data.session.user.email?.split('@')[0] || 'User',
+              });
+            }
+            
+            const redirectPath = profile?.role === 'personal' 
+              ? '/app/personal' 
+              : '/app/student/today';
+            
+            router.push(redirectPath);
+            return;
+          }
+        } catch (err) {
+          console.error('Hash auth error:', err);
+        } finally {
+          setVerifying(false);
+        }
+      }
+
+      // Check for error in URL params
+      const error = searchParams.get('error');
+      const errorDescription = searchParams.get('error_description');
+      if (error) {
+        const errorMessages: Record<string, string> = {
+          'auth_failed': 'Falha na autenticação. Tente novamente.',
+          'no_code': 'Link inválido. Solicite um novo link mágico.',
+          'no_user': 'Usuário não encontrado.',
+          'unexpected_error': 'Erro inesperado. Tente novamente.',
+          'access_denied': 'Acesso negado.',
+        };
+        setMessage({
+          type: 'error',
+          text: errorMessages[error] || errorDescription || decodeURIComponent(error),
+        });
+      }
+
+      // Check if user is already logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        const redirectPath = profile?.role === 'personal' 
+          ? '/app/personal' 
+          : '/app/student/today';
+        
+        router.push(redirectPath);
+      }
+    };
+
+    handleAuthCallback();
+  }, [searchParams, router]);
 
   // Cooldown timer
   useEffect(() => {
@@ -122,7 +225,24 @@ function LoginForm() {
     }
   };
 
-  const isDisabled = loading || cooldown > 0;
+  const isDisabled = loading || cooldown > 0 || verifying;
+
+  // Show loading state when verifying magic link
+  if (verifying) {
+    return (
+      <div className="card shadow-soft-xl">
+        <div className="text-center py-8">
+          <Loader2 className="w-12 h-12 text-primary-500 animate-spin mx-auto mb-4" />
+          <h2 className="text-xl font-bold text-gray-900 mb-2">
+            Verificando seu acesso...
+          </h2>
+          <p className="text-gray-500">
+            Aguarde enquanto validamos seu login
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="card shadow-soft-xl">
