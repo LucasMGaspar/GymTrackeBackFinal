@@ -25,7 +25,21 @@ function LoginForm() {
 
     try {
       const supabase = createClient();
-      const redirectUrl = `${window.location.origin}/auth/callback`;
+      
+      // Get plan_slug and redirect_to from URL params
+      const planSlug = searchParams.get('plan_slug');
+      const redirectTo = searchParams.get('redirect_to');
+      
+      // Build redirect URL with plan_slug if present
+      let redirectUrl = `${window.location.origin}/auth/callback`;
+      if (planSlug) {
+        redirectUrl += `?plan_slug=${encodeURIComponent(planSlug)}`;
+        if (redirectTo) {
+          redirectUrl += `&redirect_to=${encodeURIComponent(redirectTo)}`;
+        }
+      } else if (redirectTo) {
+        redirectUrl += `?redirect_to=${encodeURIComponent(redirectTo)}`;
+      }
 
       const { error } = await supabase.auth.signInWithOtp({
         email,

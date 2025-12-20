@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useCallback } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/components/ui/Toast';
 import { Check, Loader2 } from 'lucide-react';
 
@@ -39,8 +39,23 @@ interface Props {
 
 export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
+
+  // Auto-trigger checkout if plan_slug is in URL (from login redirect)
+  useEffect(() => {
+    const checkoutPlan = searchParams.get('checkout');
+    if (checkoutPlan && plans.length > 0) {
+      const plan = plans.find(p => p.slug === checkoutPlan);
+      if (plan && !currentSubscription) {
+        // Small delay to ensure page is loaded
+        setTimeout(() => {
+          handleSubscribe(plan.slug);
+        }, 500);
+      }
+    }
+  }, [searchParams, plans, currentSubscription, handleSubscribe]);
 
   const formatPrice = (cents: number, currency: string) => {
     const value = cents / 100;
@@ -50,7 +65,7 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
     }).format(value);
   };
 
-  const handleSubscribe = async (planSlug: string) => {
+  const handleSubscribe = useCallback(async (planSlug: string) => {
     setLoading(planSlug);
     try {
       const response = await fetch('/api/billing/checkout', {
@@ -76,7 +91,7 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
       showToast('Erro ao criar checkout: ' + error.message, 'error');
       setLoading(null);
     }
-  };
+  }, [showToast]);
 
   const isCurrentPlan = (planId: string) => {
     return currentSubscription?.plan_id === planId && 

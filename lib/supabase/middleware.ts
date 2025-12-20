@@ -53,8 +53,14 @@ export async function updateSession(request: NextRequest) {
       return supabaseResponse;
     }
 
-    // Protection: redirect to login if not authenticated
-    if (!user && !request.nextUrl.pathname.startsWith('/login')) {
+    // Public routes that don't require authentication
+    const publicRoutes = ['/login', '/plans'];
+    const isPublicRoute = publicRoutes.some(route => 
+      request.nextUrl.pathname === route || request.nextUrl.pathname.startsWith(route + '/')
+    );
+
+    // Protection: redirect to login if not authenticated (except public routes)
+    if (!user && !isPublicRoute && !request.nextUrl.pathname.startsWith('/api/')) {
       const url = request.nextUrl.clone();
       url.pathname = '/login';
       return NextResponse.redirect(url);

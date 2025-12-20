@@ -4,10 +4,14 @@ import { NextResponse } from 'next/server';
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get('code');
+  const planSlug = requestUrl.searchParams.get('plan_slug');
+  const redirectTo = requestUrl.searchParams.get('redirect_to');
   const origin = requestUrl.origin;
 
   console.log('🔍 Auth Callback - Debug:');
   console.log('- Code:', code ? 'presente' : 'ausente');
+  console.log('- Plan Slug:', planSlug || 'não presente');
+  console.log('- Redirect To:', redirectTo || 'não presente');
   console.log('- Origin:', origin);
 
   if (code) {
@@ -86,15 +90,35 @@ export async function GET(request: Request) {
       .single();
 
     if (!profile) {
-      console.log('🆕 Criando profile como student...');
+      console.log('🆕 Criando profile...');
+      // If plan_slug is present, user is signing up as personal trainer
+      const role = planSlug ? 'personal' : 'student';
       await supabase.from('profiles').insert({
         id: user.id,
-        role: 'student',
+        role,
         name: user.email?.split('@')[0] || 'User',
       });
       
+      // If plan_slug is present, redirect to checkout
+      if (planSlug) {
+        console.log('💳 Redirecionando para checkout com plan:', planSlug);
+        return NextResponse.redirect(`${origin}/app/personal/plans?checkout=${encodeURIComponent(planSlug)}`);
+      }
+      
       console.log('🚀 Redirecionando para: /app/student/today');
       return NextResponse.redirect(`${origin}/app/student/today`);
+    }
+
+    // If plan_slug is present and user is personal trainer, redirect to checkout
+    if (planSlug && profile.role === 'personal') {
+      console.log('💳 Redirecionando para checkout com plan:', planSlug);
+      return NextResponse.redirect(`${origin}/app/personal/plans?checkout=${encodeURIComponent(planSlug)}`);
+    }
+
+    // If redirect_to is specified, use it
+    if (redirectTo) {
+      console.log('🚀 Redirecionando para:', redirectTo);
+      return NextResponse.redirect(`${origin}${redirectTo}`);
     }
 
     // Redirect based on role
