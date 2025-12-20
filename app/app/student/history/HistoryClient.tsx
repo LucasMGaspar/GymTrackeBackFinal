@@ -90,99 +90,80 @@ export function HistoryClient({ sessions, currentUserId, currentUserRole }: Prop
 
   const stats = calculateStats();
 
+  const filterOptions = [
+    { key: '7days', label: '7 dias' },
+    { key: '14days', label: '14 dias' },
+    { key: '30days', label: '30 dias' },
+    { key: 'all', label: 'Todos' },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div>
         <Link
           href="/app/student/today"
-          className="text-sm text-blue-600 hover:text-blue-700 mb-2 inline-block"
+          className="inline-flex items-center gap-2 text-sm text-primary-600 hover:text-primary-700 font-medium mb-3"
         >
-          ← Voltar para Treino do Dia
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+          </svg>
+          Voltar para Treino
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Histórico de Treinos</h1>
-        <p className="text-gray-600 text-sm mt-1">
-          Seus treinos completados nos últimos dias
+        <h1 className="text-2xl font-bold text-dark-900">Histórico de Treinos</h1>
+        <p className="text-dark-500 text-sm mt-1">
+          Acompanhe sua evolução ao longo do tempo
         </p>
       </div>
 
       {/* Stats */}
       {stats.total > 0 && (
-        <div className="grid grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-            <div className="text-2xl font-bold text-blue-600">{stats.total}</div>
-            <div className="text-xs text-gray-600 mt-1">Treinos</div>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="card p-4 text-center">
+            <p className="text-2xl font-bold text-primary-600">{stats.total}</p>
+            <p className="text-xs text-dark-500 mt-1">Treinos</p>
           </div>
-          <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-            <div className="text-2xl font-bold text-green-600">{stats.avgExercises}</div>
-            <div className="text-xs text-gray-600 mt-1">Exercícios/Treino</div>
+          <div className="card p-4 text-center">
+            <p className="text-2xl font-bold text-success-600">{stats.avgExercises}</p>
+            <p className="text-xs text-dark-500 mt-1">Exercícios/Treino</p>
           </div>
-          <div className="bg-white rounded-lg shadow-sm p-4 text-center">
-            <div className="text-2xl font-bold text-purple-600">
+          <div className="card p-4 text-center">
+            <p className="text-2xl font-bold text-accent-600">
               {formatDuration(stats.avgDuration)}
-            </div>
-            <div className="text-xs text-gray-600 mt-1">Duração Média</div>
+            </p>
+            <p className="text-xs text-dark-500 mt-1">Duração Média</p>
           </div>
         </div>
       )}
 
       {/* Filters */}
-      <div className="flex gap-2 overflow-x-auto pb-2">
-        <button
-          onClick={() => setFilterPeriod('7days')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
-            filterPeriod === '7days'
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
-              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-          }`}
-        >
-          Últimos 7 dias
-        </button>
-        <button
-          onClick={() => setFilterPeriod('14days')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
-            filterPeriod === '14days'
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
-              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-          }`}
-        >
-          Últimos 14 dias
-        </button>
-        <button
-          onClick={() => setFilterPeriod('30days')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
-            filterPeriod === '30days'
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
-              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-          }`}
-        >
-          Últimos 30 dias
-        </button>
-        <button
-          onClick={() => setFilterPeriod('all')}
-          className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
-            filterPeriod === 'all'
-              ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
-              : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'
-          }`}
-        >
-          Todos
-        </button>
+      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+        {filterOptions.map((filter) => (
+          <button
+            key={filter.key}
+            onClick={() => setFilterPeriod(filter.key as FilterPeriod)}
+            className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
+              filterPeriod === filter.key
+                ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/25'
+                : 'bg-dark-100 text-dark-600 hover:bg-dark-200'
+            }`}
+          >
+            {filter.label}
+          </button>
+        ))}
       </div>
 
       {/* Sessions List */}
       {filteredSessions.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-6xl mb-4">📊</div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Nenhum treino encontrado</h3>
-          <p className="text-gray-600 mb-6">Complete alguns treinos para ver seu histórico aqui.</p>
-          <Link
-            href="/app/student/today"
-            className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
-          >
-            Ir para Treino do Dia
-          </Link>
-        </div>
+        <EmptyState
+          icon="calendar"
+          title="Nenhum treino encontrado"
+          description="Complete alguns treinos para ver seu histórico aqui."
+          action={{
+            label: 'Ir para Treino do Dia',
+            onClick: () => window.location.href = '/app/student/today',
+          }}
+        />
       ) : (
         <div className="space-y-4">
           {filteredSessions.map((session) => {
@@ -194,31 +175,31 @@ export function HistoryClient({ sessions, currentUserId, currentUserRole }: Prop
               <button
                 key={session.id}
                 onClick={() => setSelectedSession(session)}
-                className="w-full bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden text-left hover:shadow-lg hover:border-indigo-100 transition-all duration-200"
+                className="w-full card overflow-hidden text-left hover:shadow-elevated transition-all duration-300"
               >
-                {/* Header com gradiente */}
-                <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-3">
+                {/* Header */}
+                <div className="bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-4">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h3 className="font-bold text-white text-lg">{session.template_name}</h3>
-                      <p className="text-sm text-white opacity-90 mt-1">
+                      <p className="text-sm text-white/80 mt-1">
                         {formatDate(session.session_date)}
                       </p>
                     </div>
                     <div className="text-right">
-                      <div className="bg-white bg-opacity-20 rounded-lg px-3 py-1">
-                        <div className="text-xs text-white font-semibold">
+                      <div className="bg-white/20 backdrop-blur-sm rounded-lg px-3 py-1.5">
+                        <p className="text-xs text-white font-semibold">
                           {session.completed_at &&
                             new Date(session.completed_at).toLocaleTimeString('pt-BR', {
                               hour: '2-digit',
                               minute: '2-digit',
                             })}
-                        </div>
+                        </p>
                       </div>
                       {session.duration_minutes && (
-                        <div className="text-xs text-white opacity-90 mt-1">
+                        <p className="text-xs text-white/80 mt-1.5">
                           {formatDuration(session.duration_minutes)}
-                        </div>
+                        </p>
                       )}
                     </div>
                   </div>
@@ -227,17 +208,21 @@ export function HistoryClient({ sessions, currentUserId, currentUserRole }: Prop
                 {/* Body */}
                 <div className="p-5">
                   <div className="flex items-center gap-4 mb-3">
-                    <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                      <svg className="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                      </svg>
+                    <div className="flex items-center gap-2 text-sm font-medium text-dark-700">
+                      <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                        </svg>
+                      </div>
                       {session.workout_session_exercises.length} exercícios
                     </div>
                     {totalSets > 0 && (
-                      <div className="flex items-center gap-2 text-sm font-semibold text-gray-700">
-                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
+                      <div className="flex items-center gap-2 text-sm font-medium text-dark-700">
+                        <div className="w-8 h-8 rounded-lg bg-success-50 text-success-600 flex items-center justify-center">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                        </div>
                         {totalSets} séries
                       </div>
                     )}
@@ -245,9 +230,9 @@ export function HistoryClient({ sessions, currentUserId, currentUserRole }: Prop
 
                   {/* Notes preview */}
                   {session.notes && (
-                    <div className="bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2">
-                      <p className="text-sm text-yellow-800 italic line-clamp-1">
-                        "{session.notes}"
+                    <div className="bg-warning-50 border border-warning-100 rounded-xl px-4 py-3">
+                      <p className="text-sm text-warning-800 italic line-clamp-1">
+                        &ldquo;{session.notes}&rdquo;
                       </p>
                     </div>
                   )}

@@ -126,21 +126,18 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
   };
 
   const getStatusBadge = (status: string) => {
-    const styles = {
-      invited: 'bg-yellow-100 text-yellow-800',
-      active: 'bg-green-100 text-green-800',
-      inactive: 'bg-gray-100 text-gray-800',
+    const config = {
+      invited: { class: 'badge-warning', label: 'Convidado', dot: true },
+      active: { class: 'badge-success', label: 'Ativo', dot: true },
+      inactive: { class: 'badge-gray', label: 'Inativo', dot: true },
     };
 
-    const labels = {
-      invited: 'Convidado',
-      active: 'Ativo',
-      inactive: 'Inativo',
-    };
+    const { class: className, label, dot } = config[status as keyof typeof config] || config.inactive;
 
     return (
-      <span className={`px-2 py-1 text-xs font-semibold rounded ${styles[status as keyof typeof styles]}`}>
-        {labels[status as keyof typeof labels]}
+      <span className={className}>
+        {dot && <span className="w-1.5 h-1.5 rounded-full bg-current opacity-70" />}
+        {label}
       </span>
     );
   };
@@ -155,39 +152,41 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Alunos</h1>
-          <p className="text-gray-600 text-sm mt-1">
+          <h1 className="text-2xl font-bold text-dark-900">Meus Alunos</h1>
+          <p className="text-dark-500 text-sm mt-1">
             {students.length} aluno{students.length !== 1 ? 's' : ''} cadastrado{students.length !== 1 ? 's' : ''}
           </p>
         </div>
-        <button
-          onClick={handleCreate}
-          className="flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-5 py-2.5 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-200 transform hover:-translate-y-0.5"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+        <button onClick={handleCreate} className="btn-primary">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
           Novo Aluno
         </button>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-4 space-y-4">
+      <div className="card p-4 space-y-4">
         {/* Search */}
-        <div>
+        <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg className="w-5 h-5 text-dark-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+          </div>
           <input
             type="text"
-            placeholder="🔍 Buscar aluno..."
+            placeholder="Buscar por nome ou email..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none"
+            className="input pl-12"
           />
         </div>
 
         {/* Status Filter */}
-        <div className="flex gap-2 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
           {[
             { key: 'all', label: 'Todos' },
             { key: 'active', label: 'Ativos' },
@@ -197,10 +196,10 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
             <button
               key={filter.key}
               onClick={() => setStatusFilter(filter.key)}
-              className={`px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
+              className={`px-4 py-2 rounded-xl text-sm font-semibold whitespace-nowrap transition-all ${
                 statusFilter === filter.key
-                  ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-md'
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  ? 'bg-primary-500 text-white shadow-lg shadow-primary-500/25'
+                  : 'bg-dark-100 text-dark-600 hover:bg-dark-200'
               }`}
             >
               {filter.label} ({statusCounts[filter.key as keyof typeof statusCounts]})
@@ -213,60 +212,65 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
       {filteredStudents.length === 0 ? (
         students.length === 0 ? (
           <EmptyState
+            icon="users"
             title="Nenhum aluno cadastrado"
             description="Comece adicionando seus alunos. Você poderá criar treinos personalizados para cada um."
             action={{
-              label: '+ Adicionar Primeiro Aluno',
+              label: 'Adicionar Primeiro Aluno',
               onClick: handleCreate,
             }}
           />
         ) : (
           <EmptyState
+            icon="search"
             title="Nenhum aluno encontrado"
-            description="Tente ajustar os filtros ou busca."
+            description="Tente ajustar os filtros ou termo de busca."
           />
         )
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
           {filteredStudents.map((student) => (
             <div
               key={student.id}
-              className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-lg hover:border-indigo-100 transition-all duration-200"
+              className="card overflow-hidden group hover:shadow-elevated transition-all duration-300"
             >
-              {/* Header com gradiente */}
-              <div className="bg-gradient-to-r from-indigo-500 to-purple-500 px-5 py-4">
-                <div className="flex items-start justify-between">
+              {/* Header */}
+              <div className="bg-gradient-to-r from-primary-500 to-primary-600 p-5">
+                <div className="flex items-start gap-3">
+                  <div className="avatar avatar-lg text-base">
+                    {student.student_name.charAt(0).toUpperCase()}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-bold text-white text-lg truncate">{student.student_name}</h3>
-                    <p className="text-sm text-white opacity-90 truncate mt-1">{student.student_email}</p>
+                    <p className="text-sm text-white/80 truncate mt-0.5">{student.student_email}</p>
                   </div>
-                  <div className="ml-3">
-                    {getStatusBadge(student.status)}
-                  </div>
+                </div>
+                <div className="mt-3">
+                  {getStatusBadge(student.status)}
                 </div>
               </div>
 
               {/* Body */}
-              <div className="p-5 space-y-3">
+              <div className="p-5 space-y-4">
                 {/* Quick Links */}
                 <div className="grid grid-cols-3 gap-2">
                   <Link
                     href={`/app/personal/students/${student.id}/templates`}
-                    className="flex flex-col items-center justify-center gap-1 text-center text-xs bg-green-50 hover:bg-green-100 text-green-700 py-2 rounded-lg font-semibold transition"
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-success-50 hover:bg-success-100 text-success-700 transition-colors"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                     </svg>
-                    Templates
+                    <span className="text-2xs font-semibold">Templates</span>
                   </Link>
                   <Link
                     href={`/app/personal/students/${student.id}/history`}
-                    className="flex flex-col items-center justify-center gap-1 text-center text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 py-2 rounded-lg font-semibold transition"
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-primary-50 hover:bg-primary-100 text-primary-700 transition-colors"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
                     </svg>
-                    Histórico
+                    <span className="text-2xs font-semibold">Histórico</span>
                   </Link>
                   <GenerateReportButton 
                     studentId={student.id}
@@ -279,26 +283,26 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleEdit(student)}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-indigo-50 text-indigo-700 rounded-lg font-semibold text-sm hover:bg-indigo-100 transition"
+                    className="btn-secondary flex-1 py-2 text-sm"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
                     </svg>
                     Editar
                   </button>
                   <button
                     onClick={() => handleToggleStatus(student)}
                     disabled={student.status === 'invited'}
-                    className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg font-semibold text-sm hover:bg-gray-200 transition disabled:opacity-50"
+                    className="btn-ghost flex-1 py-2 text-sm disabled:opacity-50"
                   >
                     {student.status === 'active' ? 'Desativar' : 'Ativar'}
                   </button>
                   <button
                     onClick={() => handleDeleteClick(student)}
-                    className="px-3 py-2 bg-red-50 text-red-700 rounded-lg font-semibold text-sm hover:bg-red-100 transition"
+                    className="btn-ghost p-2 text-danger-600 hover:bg-danger-50"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
                     </svg>
                   </button>
                 </div>
@@ -308,10 +312,10 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
                   <button
                     onClick={() => handleSendInvite(student)}
                     disabled={sendingInvite === student.id}
-                    className="w-full flex items-center justify-center gap-2 text-sm bg-yellow-50 hover:bg-yellow-100 text-yellow-800 py-2.5 rounded-lg font-semibold transition disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-warning-50 hover:bg-warning-100 text-warning-700 font-semibold text-sm transition-colors disabled:opacity-50"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
                     </svg>
                     {sendingInvite === student.id ? 'Enviando...' : 'Reenviar Convite'}
                   </button>
