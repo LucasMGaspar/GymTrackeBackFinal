@@ -3,13 +3,15 @@ import { ReactNode } from 'react';
 interface ButtonProps {
   children: ReactNode;
   onClick?: () => void;
-  variant?: 'primary' | 'secondary' | 'danger' | 'success' | 'ghost';
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
   fullWidth?: boolean;
   disabled?: boolean;
   loading?: boolean;
   type?: 'button' | 'submit';
   icon?: ReactNode;
+  iconPosition?: 'left' | 'right';
+  className?: string;
 }
 
 export function Button({
@@ -22,20 +24,22 @@ export function Button({
   loading = false,
   type = 'button',
   icon,
+  iconPosition = 'left',
+  className = '',
 }: ButtonProps) {
   const variants = {
-    primary: 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl shadow-indigo-500/25',
-    secondary: 'bg-white hover:bg-gray-50 text-gray-700 border-2 border-gray-200 hover:border-gray-300',
-    danger: 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white shadow-lg hover:shadow-xl shadow-red-500/25',
-    success: 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white shadow-lg hover:shadow-xl shadow-green-500/25',
-    ghost: 'bg-transparent hover:bg-gray-100 text-gray-600 hover:text-gray-900',
+    primary: 'btn-primary',
+    secondary: 'btn-secondary',
+    ghost: 'btn-ghost',
+    danger: 'btn-danger',
+    success: 'btn-success',
+    outline: 'btn-outline',
   };
 
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm rounded-lg gap-1.5',
-    md: 'px-4 py-2.5 text-sm rounded-xl gap-2',
-    lg: 'px-6 py-3 text-base rounded-xl gap-2',
-    xl: 'px-8 py-4 text-lg rounded-2xl gap-3',
+    sm: 'btn-sm',
+    md: '',
+    lg: 'btn-lg',
   };
 
   const isDisabled = disabled || loading;
@@ -46,29 +50,75 @@ export function Button({
       onClick={onClick}
       disabled={isDisabled}
       className={`
-        inline-flex items-center justify-center font-semibold 
-        transition-all duration-200 
-        transform hover:-translate-y-0.5 active:scale-[0.98]
-        disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:hover:shadow-none
-        ${variants[variant]} 
-        ${sizes[size]} 
+        ${variants[variant]}
+        ${sizes[size]}
         ${fullWidth ? 'w-full' : ''}
+        ${className}
       `}
     >
       {loading ? (
         <>
-          <svg className="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
+          <div className="w-4 h-4 loading-spinner" />
           <span>Carregando...</span>
         </>
       ) : (
         <>
-          {icon && <span className="flex-shrink-0">{icon}</span>}
+          {icon && iconPosition === 'left' && <span className="flex-shrink-0">{icon}</span>}
           {children}
+          {icon && iconPosition === 'right' && <span className="flex-shrink-0">{icon}</span>}
         </>
       )}
+    </button>
+  );
+}
+
+interface IconButtonProps {
+  icon: ReactNode;
+  onClick?: () => void;
+  variant?: 'primary' | 'secondary' | 'ghost' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  disabled?: boolean;
+  label: string;
+  className?: string;
+}
+
+export function IconButton({
+  icon,
+  onClick,
+  variant = 'ghost',
+  size = 'md',
+  disabled = false,
+  label,
+  className = '',
+}: IconButtonProps) {
+  const variants = {
+    primary: 'bg-primary-500 text-white hover:bg-primary-600 shadow-sm',
+    secondary: 'bg-dark-100 text-dark-700 hover:bg-dark-200',
+    ghost: 'text-dark-500 hover:text-dark-700 hover:bg-dark-100',
+    danger: 'text-danger-500 hover:text-danger-600 hover:bg-danger-50',
+  };
+
+  const sizes = {
+    sm: 'p-1.5',
+    md: 'p-2',
+    lg: 'p-3',
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      className={`
+        inline-flex items-center justify-center rounded-lg transition-all duration-200
+        disabled:opacity-50 disabled:cursor-not-allowed
+        ${variants[variant]}
+        ${sizes[size]}
+        ${className}
+      `}
+    >
+      {icon}
     </button>
   );
 }

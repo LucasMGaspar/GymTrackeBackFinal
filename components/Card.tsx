@@ -3,18 +3,23 @@ import { ReactNode } from 'react';
 interface CardProps {
   children: ReactNode;
   className?: string;
-  hover?: boolean;
-  gradient?: boolean;
+  variant?: 'default' | 'elevated' | 'interactive' | 'gradient';
   padding?: 'none' | 'sm' | 'md' | 'lg';
 }
 
 export function Card({ 
   children, 
   className = '', 
-  hover = false, 
-  gradient = false,
+  variant = 'default',
   padding = 'md'
 }: CardProps) {
+  const variants = {
+    default: 'card',
+    elevated: 'card-elevated',
+    interactive: 'card-interactive',
+    gradient: 'card-gradient',
+  };
+
   const paddingClasses = {
     none: '',
     sm: 'p-4',
@@ -23,15 +28,7 @@ export function Card({
   };
 
   return (
-    <div
-      className={`
-        bg-white rounded-2xl shadow-soft border border-gray-100/80
-        ${hover ? 'hover:shadow-lg hover:-translate-y-1 transition-all duration-300' : ''}
-        ${gradient ? 'bg-gradient-to-br from-white to-gray-50/50' : ''}
-        ${paddingClasses[padding]}
-        ${className}
-      `}
-    >
+    <div className={`${variants[variant]} ${paddingClasses[padding]} ${className}`}>
       {children}
     </div>
   );
@@ -42,7 +39,7 @@ interface MetricCardProps {
   value: string | number;
   subtitle?: string;
   icon?: ReactNode;
-  gradient?: 'indigo' | 'green' | 'amber' | 'rose' | 'blue' | 'purple';
+  gradient?: 'primary' | 'success' | 'warning' | 'danger' | 'accent';
   trend?: {
     value: number;
     isPositive: boolean;
@@ -50,12 +47,11 @@ interface MetricCardProps {
 }
 
 const gradientClasses = {
-  indigo: 'from-indigo-500 to-purple-600',
-  green: 'from-green-500 to-emerald-600',
-  amber: 'from-amber-500 to-orange-600',
-  rose: 'from-rose-500 to-pink-600',
-  blue: 'from-blue-500 to-cyan-600',
-  purple: 'from-purple-500 to-violet-600',
+  primary: 'from-primary-500 to-primary-600',
+  success: 'from-success-500 to-success-600',
+  warning: 'from-warning-500 to-warning-600',
+  danger: 'from-danger-500 to-danger-600',
+  accent: 'from-accent-500 to-accent-600',
 };
 
 export function MetricCard({ 
@@ -63,58 +59,45 @@ export function MetricCard({
   value, 
   subtitle, 
   icon, 
-  gradient = 'indigo', 
+  gradient = 'primary', 
   trend 
 }: MetricCardProps) {
   return (
-    <div className={`
-      relative overflow-hidden rounded-2xl 
-      bg-gradient-to-br ${gradientClasses[gradient]} 
-      p-6 text-white shadow-lg hover:shadow-xl 
-      transition-all duration-300 hover:-translate-y-1
-    `}>
+    <div className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${gradientClasses[gradient]} p-6 text-white shadow-lg`}>
       {/* Background pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)',
-          backgroundSize: '20px 20px'
-        }}></div>
-      </div>
+      <div className="absolute inset-0 stat-pattern" />
       
-      {/* Decorative circle */}
-      <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/10 rounded-full"></div>
-      <div className="absolute -right-4 -bottom-8 w-24 h-24 bg-white/5 rounded-full"></div>
+      {/* Decorative elements */}
+      <div className="absolute -right-6 -top-6 w-24 h-24 bg-white/10 rounded-full" />
+      <div className="absolute -right-2 -bottom-8 w-32 h-32 bg-white/5 rounded-full" />
       
       <div className="relative">
         <div className="flex items-start justify-between mb-4">
-          <div>
-            <p className="text-sm font-semibold opacity-90">{title}</p>
-          </div>
+          <p className="text-sm font-medium text-white/90">{title}</p>
           {icon && (
-            <div className="w-12 h-12 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
+            <div className="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
               {icon}
             </div>
           )}
         </div>
         
-        <div className="space-y-2">
-          <p className="text-4xl font-bold tracking-tight">{value}</p>
+        <div className="space-y-1">
+          <p className="text-3xl font-bold tracking-tight">{value}</p>
           {subtitle && (
-            <p className="text-sm font-medium opacity-80">{subtitle}</p>
+            <p className="text-sm text-white/80">{subtitle}</p>
           )}
           {trend && (
-            <div className={`
-              inline-flex items-center gap-1 text-sm font-semibold 
-              px-2 py-1 rounded-full
-              ${trend.isPositive ? 'bg-white/20' : 'bg-white/10'}
-            `}>
+            <div className={`inline-flex items-center gap-1 text-sm font-medium mt-2 px-2 py-0.5 rounded-full ${
+              trend.isPositive ? 'bg-white/20' : 'bg-white/10'
+            }`}>
               <svg
-                className={`w-4 h-4 ${trend.isPositive ? 'rotate-0' : 'rotate-180'}`}
+                className={`w-3.5 h-3.5 ${trend.isPositive ? '' : 'rotate-180'}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                strokeWidth={2.5}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 10.5L12 3m0 0l7.5 7.5M12 3v18" />
               </svg>
               <span>{Math.abs(trend.value)}%</span>
             </div>
@@ -125,34 +108,67 @@ export function MetricCard({
   );
 }
 
-export function StatCard({ 
-  label, 
-  value, 
-  icon,
-  color = 'indigo'
-}: { 
-  label: string; 
-  value: string | number; 
+interface StatCardProps {
+  label: string;
+  value: string | number;
   icon?: ReactNode;
-  color?: 'indigo' | 'green' | 'amber' | 'rose' | 'blue';
-}) {
-  const colorClasses = {
-    indigo: 'from-indigo-50 to-indigo-100 text-indigo-600',
-    green: 'from-green-50 to-green-100 text-green-600',
-    amber: 'from-amber-50 to-amber-100 text-amber-600',
-    rose: 'from-rose-50 to-rose-100 text-rose-600',
-    blue: 'from-blue-50 to-blue-100 text-blue-600',
-  };
+  color?: 'primary' | 'success' | 'warning' | 'danger' | 'accent';
+}
 
+const colorClasses = {
+  primary: 'bg-primary-50 text-primary-600 border-primary-100',
+  success: 'bg-success-50 text-success-600 border-success-100',
+  warning: 'bg-warning-50 text-warning-600 border-warning-100',
+  danger: 'bg-danger-50 text-danger-600 border-danger-100',
+  accent: 'bg-accent-50 text-accent-600 border-accent-100',
+};
+
+export function StatCard({ label, value, icon, color = 'primary' }: StatCardProps) {
   return (
-    <div className="text-center p-5 bg-gradient-to-br from-white to-gray-50 rounded-2xl border border-gray-100">
+    <div className="card p-5 text-center">
       {icon && (
-        <div className={`w-12 h-12 mx-auto mb-3 bg-gradient-to-br ${colorClasses[color]} rounded-xl flex items-center justify-center`}>
+        <div className={`w-12 h-12 mx-auto mb-3 rounded-xl border flex items-center justify-center ${colorClasses[color]}`}>
           {icon}
         </div>
       )}
-      <p className="text-3xl font-bold text-gray-900">{value}</p>
-      <p className="text-sm text-gray-500 font-medium mt-1">{label}</p>
+      <p className="text-2xl font-bold text-dark-900">{value}</p>
+      <p className="text-sm text-dark-500 mt-1">{label}</p>
+    </div>
+  );
+}
+
+interface InfoCardProps {
+  title: string;
+  description?: string;
+  icon?: ReactNode;
+  action?: {
+    label: string;
+    onClick: () => void;
+  };
+}
+
+export function InfoCard({ title, description, icon, action }: InfoCardProps) {
+  return (
+    <div className="card p-5 flex items-start gap-4">
+      {icon && (
+        <div className="w-10 h-10 rounded-xl bg-primary-50 text-primary-600 flex items-center justify-center flex-shrink-0">
+          {icon}
+        </div>
+      )}
+      <div className="flex-1 min-w-0">
+        <h3 className="font-semibold text-dark-900">{title}</h3>
+        {description && (
+          <p className="text-sm text-dark-500 mt-1">{description}</p>
+        )}
+        {action && (
+          <button
+            onClick={action.onClick}
+            className="text-sm font-medium text-primary-600 hover:text-primary-700 mt-2"
+          >
+            {action.label} →
+          </button>
+        )}
+      </div>
     </div>
   );
 }
