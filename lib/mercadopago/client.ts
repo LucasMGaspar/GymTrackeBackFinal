@@ -79,10 +79,10 @@ export async function createPreApproval(params: CreatePreApprovalParams) {
       success: true,
       data: {
         id: response.id,
-        init_point: response.init_point,
-        sandbox_init_point: response.sandbox_init_point,
+        init_point: response.init_point || '',
+        sandbox_init_point: (response as any).sandbox_init_point || response.init_point || '',
         status: response.status,
-        external_reference: response.external_reference,
+        external_reference: response.external_reference || '',
       },
     };
   } catch (error: any) {
@@ -113,9 +113,9 @@ export async function getPreApproval(preapprovalId: string) {
         auto_recurring: response.auto_recurring,
         payer_id: response.payer_id,
         payer_email: response.payer_email,
-        init_point: response.init_point,
-        sandbox_init_point: response.sandbox_init_point,
-        external_reference: response.external_reference,
+        init_point: response.init_point || '',
+        sandbox_init_point: (response as any).sandbox_init_point || response.init_point || '',
+        external_reference: response.external_reference || '',
         created: response.date_created,
         updated: response.last_modified,
       },

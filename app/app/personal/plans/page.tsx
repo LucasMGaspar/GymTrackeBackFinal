@@ -42,8 +42,8 @@ export default async function PlansPage() {
 
   return (
     <PlansClient 
-      plans={plans}
-      currentSubscription={currentSubscription}
+      plans={plans || []}
+      currentSubscription={currentSubscription || null}
       userEmail={user.email || ''}
     />
   );

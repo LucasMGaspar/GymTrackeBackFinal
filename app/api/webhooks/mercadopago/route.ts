@@ -42,8 +42,8 @@ function generateIdempotencyKey(eventId: string, provider: string = 'mercadopago
  * Handle Mercado Pago webhook events
  */
 export async function POST(request: NextRequest) {
-  let eventId: string | null = null;
-  let eventType: string | null = null;
+  let eventId: string = '';
+  let eventType: string = 'unknown';
   
   try {
     // Rate limiting (more restrictive for webhooks)
@@ -60,9 +60,14 @@ export async function POST(request: NextRequest) {
     const payload = await request.text();
     const body = JSON.parse(payload);
 
-    // Extract event information
+    // Extract event information - ensure eventId is always a string
     eventId = body.id || body.data?.id || `evt_${Date.now()}_${Math.random()}`;
     eventType = body.type || body.action || 'unknown';
+
+    // Ensure eventId is not empty and is a string
+    if (!eventId || typeof eventId !== 'string') {
+      eventId = `evt_${Date.now()}_${Math.random()}`;
+    }
 
     console.log('[Webhook] Received event:', {
       eventId,
@@ -80,7 +85,7 @@ export async function POST(request: NextRequest) {
     // Create Supabase client with service role for webhook processing
     const supabase = await createClient();
 
-    // Generate idempotency key
+    // Generate idempotency key (eventId is guaranteed to be string here)
     const dedupeKey = generateIdempotencyKey(eventId);
 
     // Check if event was already processed (idempotency)
@@ -151,7 +156,7 @@ export async function POST(request: NextRequest) {
         // Fetch latest status from Mercado Pago API
         const mpStatusResult = await getPreApproval(mpPreapprovalId);
         
-        if (mpStatusResult.success && mpStatusResult.data) {
+        if (mpStatusResult.success && mpStatusResult.data && mpStatusResult.data.status) {
           const mpStatus = mpStatusResult.data.status;
           const internalStatus = mapMPStatusToInternal(mpStatus);
 
