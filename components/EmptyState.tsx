@@ -1,36 +1,43 @@
+import { Calendar, Dumbbell, Inbox } from 'lucide-react';
+
 interface EmptyStateProps {
   title: string;
   description: string;
+  icon?: 'inbox' | 'calendar' | 'dumbbell';
   action?: {
     label: string;
     onClick: () => void;
   };
 }
 
-export function EmptyState({ title, description, action }: EmptyStateProps) {
+const icons = {
+  inbox: Inbox,
+  calendar: Calendar,
+  dumbbell: Dumbbell,
+};
+
+export function EmptyState({ title, description, icon = 'inbox', action }: EmptyStateProps) {
+  const IconComponent = icons[icon];
+
   return (
-    <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-      <div className="bg-gray-100 rounded-full p-6 mb-4">
-        <svg
-          className="w-12 h-12 text-gray-400"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-          />
-        </svg>
+    <div className="flex flex-col items-center justify-center py-16 px-4 text-center animate-fade-in">
+      <div className="relative mb-6">
+        {/* Background glow */}
+        <div className="absolute inset-0 bg-primary-500/20 rounded-full blur-2xl scale-150"></div>
+        
+        {/* Icon container */}
+        <div className="relative bg-gradient-to-br from-primary-50 to-primary-100 rounded-3xl p-6 shadow-soft">
+          <IconComponent className="w-12 h-12 text-primary-500" strokeWidth={1.5} />
+        </div>
       </div>
-      <h3 className="text-lg font-semibold text-gray-900 mb-2">{title}</h3>
-      <p className="text-gray-600 mb-6 max-w-sm">{description}</p>
+
+      <h3 className="text-xl font-bold text-gray-900 mb-2">{title}</h3>
+      <p className="text-gray-500 mb-8 max-w-sm leading-relaxed">{description}</p>
+
       {action && (
         <button
           onClick={action.onClick}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition"
+          className="btn-primary"
         >
           {action.label}
         </button>
