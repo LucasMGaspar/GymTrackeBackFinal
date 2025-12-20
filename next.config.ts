@@ -6,40 +6,6 @@ const nextConfig: NextConfig = {
       bodySizeLimit: '2mb',
     },
   },
-  webpack: (config, { isServer, webpack }) => {
-    if (isServer) {
-      // Exclude jsPDF from server-side bundle to avoid CSS file access during build
-      config.externals = config.externals || [];
-      if (Array.isArray(config.externals)) {
-        config.externals.push({
-          'jspdf': 'commonjs jspdf',
-          'jspdf-autotable': 'commonjs jspdf-autotable',
-        });
-      } else if (typeof config.externals === 'object') {
-        config.externals = [
-          config.externals,
-          {
-            'jspdf': 'commonjs jspdf',
-            'jspdf-autotable': 'commonjs jspdf-autotable',
-          },
-        ];
-      }
-      
-      // Ignore jsPDF during static analysis
-      config.plugins = config.plugins || [];
-      config.plugins.push(
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^jspdf$/,
-          contextRegExp: /node_modules/,
-        }),
-        new webpack.IgnorePlugin({
-          resourceRegExp: /^jspdf-autotable$/,
-          contextRegExp: /node_modules/,
-        })
-      );
-    }
-    return config;
-  },
   async headers() {
     return [
       {
