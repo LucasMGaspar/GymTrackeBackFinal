@@ -2,6 +2,10 @@ import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 
+// Force dynamic rendering to avoid build-time analysis
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // Dynamic import to avoid build-time issues with jsPDF
 const generateMonthlyReport = async (data: any) => {
   const { generateMonthlyReport: generate } = await import('@/lib/reports/generateMonthlyReport');

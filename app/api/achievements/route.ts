@@ -3,6 +3,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 import { isValidUUID } from '@/lib/security/sanitize';
 
+// Force dynamic rendering to avoid build-time analysis
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
+
 // GET: Fetch student achievements
 export async function GET(request: Request) {
   try {
