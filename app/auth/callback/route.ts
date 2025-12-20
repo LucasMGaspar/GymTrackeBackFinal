@@ -14,14 +14,15 @@ export async function GET(request: Request) {
     const supabase = await createClient();
     
     console.log('🔄 Trocando code por sessão...');
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (error) {
       console.log('❌ Erro ao trocar code:', error.message);
-      return NextResponse.redirect(`${origin}/login?error=${error.message}`);
+      return NextResponse.redirect(`${origin}/login?error=${encodeURIComponent(error.message)}`);
     }
 
     console.log('✅ Sessão criada com sucesso!');
+    console.log('📦 Session data:', data?.session ? 'presente' : 'ausente');
 
     // Get user
     const { data: { user } } = await supabase.auth.getUser();
@@ -93,7 +94,17 @@ export async function GET(request: Request) {
       : '/app/student/today';
     
     console.log('🚀 Redirecionando para:', redirectPath);
-    return NextResponse.redirect(`${origin}${redirectPath}`);
+    
+    // Create redirect response and ensure cookies are set
+    const response = NextResponse.redirect(`${origin}${redirectPath}`);
+    
+    // Ensure session cookies are preserved
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      console.log('🍪 Sessão confirmada antes do redirect');
+    }
+    
+    return response;
   }
 
   console.log('❌ Code não encontrado - redirecionando para login');
