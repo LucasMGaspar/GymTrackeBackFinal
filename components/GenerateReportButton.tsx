@@ -48,6 +48,18 @@ export function GenerateReportButton({ studentId, studentName, variant = 'defaul
         }),
       });
 
+      // Verificar se a resposta é JSON (funcionalidade temporariamente desabilitada)
+      const contentType = response.headers.get('content-type');
+      if (contentType?.includes('application/json')) {
+        const data = await response.json();
+        if (data.message) {
+          showToast('Funcionalidade de PDF temporariamente desabilitada. Em breve estará disponível novamente.', 'info');
+          setIsOpen(false);
+          setGenerating(false);
+          return;
+        }
+      }
+
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Failed to generate report');

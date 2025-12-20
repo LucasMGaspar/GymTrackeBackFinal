@@ -6,13 +6,15 @@ import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
 
-// Use Function constructor to prevent static analysis during build
+// Temporariamente desabilitado - função comentada para evitar problemas de build
+/*
 async function getGenerateMonthlyReport() {
   // This prevents webpack from analyzing the import during build
   const dynamicImport = new Function('specifier', 'return import(specifier)');
   const module = await dynamicImport('@/lib/reports/generateMonthlyReport');
   return module.generateMonthlyReport;
 }
+*/
 
 export async function POST(request: Request) {
   try {
@@ -106,6 +108,28 @@ export async function POST(request: Request) {
       );
     }
 
+    // TODO: Temporariamente desabilitado devido a problemas de build com jsPDF
+    // Retornar dados JSON em vez de PDF até implementar solução alternativa
+    return NextResponse.json({
+      message: 'Funcionalidade de PDF temporariamente desabilitada',
+      data: {
+        student: {
+          name: student.student_name,
+          email: student.student_email,
+        },
+        period: {
+          start: periodStart.toISOString(),
+          end: periodEnd.toISOString(),
+        },
+        sessions: sessions || [],
+        metrics: {
+          totalSessions: sessions?.length || 0,
+          totalExercises: sessions?.reduce((acc, s) => acc + (s.workout_session_exercises?.length || 0), 0) || 0,
+        },
+      },
+    }, { status: 200 });
+    
+    /* CÓDIGO ORIGINAL COMENTADO - Descomentar quando implementar solução alternativa
     // Generate PDF (lazy load to avoid build issues)
     const generateMonthlyReport = await getGenerateMonthlyReport();
     const pdf = await generateMonthlyReport({
@@ -131,6 +155,7 @@ export async function POST(request: Request) {
         'Content-Disposition': `attachment; filename="${filename}"`,
       },
     });
+    */
   } catch (error: any) {
     console.error('Error generating report:', error);
     return NextResponse.json(
