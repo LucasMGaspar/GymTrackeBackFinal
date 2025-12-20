@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { TopNav } from '@/components/TopNav';
 import { BottomNav } from '@/components/BottomNav';
 
-export default async function StudentLayout({
+export default async function PersonalLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -24,17 +24,17 @@ export default async function StudentLayout({
     .eq('id', user.id)
     .single();
 
-  if (!profile || profile.role !== 'student') {
-    redirect('/login');
+  if (!profile || profile.role !== 'personal') {
+    redirect('/app/student/today');
   }
 
   return (
     <div className="min-h-screen mesh-gradient pb-24">
-      <TopNav profile={profile} title="Meus Treinos" />
-      <main className="max-w-3xl mx-auto px-4 py-6">
+      <TopNav profile={profile} title="FitPro" />
+      <main className="max-w-6xl mx-auto px-4 py-6">
         {children}
       </main>
-      <BottomNav role="student" />
+      <BottomNav role="personal" />
     </div>
   );
 }
