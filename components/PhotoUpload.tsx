@@ -52,8 +52,21 @@ export function PhotoUpload({ photos, onPhotosChange, assessmentId, disabled }: 
         throw new Error(result.error || 'Failed to upload');
       }
 
+      // Verificar se a URL foi retornada
+      if (!result.url) {
+        console.error('No URL returned from upload:', result);
+        throw new Error('URL não foi retornada do servidor');
+      }
+
+      console.log('Upload successful, received URL:', result.url);
+
       // Adicionar URL à lista de fotos
-      onPhotosChange([...photos, result.url]);
+      const newPhotos = [...photos, result.url];
+      console.log('Updating photos list:', newPhotos);
+      onPhotosChange(newPhotos);
+      
+      // Limpar erro se houver
+      setUploadError(null);
     } catch (error: any) {
       console.error('Upload error:', error);
       setUploadError(error.message || 'Erro ao fazer upload da foto');
