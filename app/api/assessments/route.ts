@@ -204,7 +204,6 @@ export async function POST(request: NextRequest) {
       photos: data.photos || [],
     };
 
-    // Add optional fields only if provided, with validation for NUMERIC(5,2) = max 999.99
     // Helper function to validate and round numeric values
     const validateAndRound = (value: number | null | undefined, max: number, fieldName: string): number | null => {
       if (value === undefined || value === null) return null;
@@ -214,21 +213,13 @@ export async function POST(request: NextRequest) {
       return Math.round(value * 100) / 100; // Round to 2 decimals
     };
 
+    // Add optional fields only if provided, with validation for NUMERIC(5,2) = max 999.99
     try {
       if (data.weight !== undefined && data.weight !== null) 
         assessmentData.weight = validateAndRound(data.weight, 999.99, 'Peso');
       if (data.height !== undefined && data.height !== null) 
         assessmentData.height = validateAndRound(data.height, 999.99, 'Altura');
-    // Helper function to validate and round numeric values
-    const validateAndRound = (value: number | null | undefined, max: number, fieldName: string): number | null => {
-      if (value === undefined || value === null) return null;
-      if (value > max || value < 0) {
-        throw new Error(`${fieldName} deve estar entre 0 e ${max}`);
-      }
-      return Math.round(value * 100) / 100; // Round to 2 decimals
-    };
-
-    if (data.body_fat_percentage !== undefined && data.body_fat_percentage !== null) 
+      if (data.body_fat_percentage !== undefined && data.body_fat_percentage !== null) 
       assessmentData.body_fat_percentage = validateAndRound(data.body_fat_percentage, 100, '% Gordura Corporal');
     if (data.muscle_mass !== undefined && data.muscle_mass !== null) 
       assessmentData.muscle_mass = validateAndRound(data.muscle_mass, 999.99, 'Massa Muscular');
