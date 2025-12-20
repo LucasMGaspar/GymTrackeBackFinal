@@ -24,10 +24,12 @@ export default async function PlansPage() {
   }
 
   // Fetch plans directly from database
+  // Filter out free plan to keep cards organized
   const { data: plans } = await supabase
     .from('plans')
     .select('*')
     .eq('is_active', true)
+    .neq('slug', 'free') // Exclude free plan
     .order('price_cents', { ascending: true });
 
   // Fetch current subscription directly from database

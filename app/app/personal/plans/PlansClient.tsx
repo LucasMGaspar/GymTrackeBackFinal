@@ -42,6 +42,7 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
   const searchParams = useSearchParams();
   const { showToast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
+  const [autoCheckoutInProgress, setAutoCheckoutInProgress] = useState(false);
 
   const formatPrice = (cents: number, currency: string) => {
     const value = cents / 100;
@@ -63,7 +64,8 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to create checkout');
+        const errorMessage = data.error || data.details || 'Failed to create checkout';
+        throw new Error(errorMessage);
       }
 
       // Redirect to Mercado Pago checkout
@@ -74,24 +76,42 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
       }
     } catch (error: any) {
       console.error('Checkout error:', error);
-      showToast('Erro ao criar checkout: ' + error.message, 'error');
+      const errorMessage = error.message || 'Erro desconhecido ao criar checkout';
+      showToast(`Erro ao criar checkout: ${errorMessage}`, 'error');
       setLoading(null);
+      
+      // Remove checkout parameter from URL to prevent retry loop
+      const url = new URL(window.location.href);
+      url.searchParams.delete('checkout');
+      window.history.replaceState({}, '', url.toString());
     }
   }, [showToast]);
 
   // Auto-trigger checkout if plan_slug is in URL (from login redirect)
   useEffect(() => {
     const checkoutPlan = searchParams.get('checkout');
-    if (checkoutPlan && plans.length > 0) {
+    if (checkoutPlan && plans.length > 0 && !autoCheckoutInProgress) {
       const plan = plans.find(p => p.slug === checkoutPlan);
-      if (plan && !currentSubscription) {
-        // Small delay to ensure page is loaded
-        setTimeout(() => {
+      if (plan && !currentSubscription && !loading) {
+        setAutoCheckoutInProgress(true);
+        // Longer delay to ensure page is fully loaded and user is authenticated
+        const timeoutId = setTimeout(() => {
           handleSubscribe(plan.slug);
-        }, 500);
+        }, 1500);
+        
+        // Cleanup timeout if component unmounts
+        return () => {
+          clearTimeout(timeoutId);
+          setAutoCheckoutInProgress(false);
+        };
+      } else if (checkoutPlan && currentSubscription) {
+        // User already has subscription, remove checkout param
+        const url = new URL(window.location.href);
+        url.searchParams.delete('checkout');
+        window.history.replaceState({}, '', url.toString());
       }
     }
-  }, [searchParams, plans, currentSubscription, handleSubscribe]);
+  }, [searchParams, plans, currentSubscription, handleSubscribe, loading, autoCheckoutInProgress]);
 
   const isCurrentPlan = (planId: string) => {
     return currentSubscription?.plan_id === planId && 
@@ -116,6 +136,16 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
           <p className="text-lg text-gray-600">
             Planos flexíveis para personal trainers de todos os tamanhos
           </p>
+          {autoCheckoutInProgress && (
+            <div className="mt-4 p-4 bg-primary-50 border border-primary-200 rounded-lg">
+              <div className="flex items-center justify-center gap-3">
+                <Loader2 className="w-5 h-5 text-primary-600 animate-spin" />
+                <span className="text-primary-700 font-medium">
+                  Preparando checkout...
+                </span>
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">

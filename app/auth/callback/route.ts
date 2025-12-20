@@ -112,7 +112,10 @@ export async function GET(request: Request) {
     // If plan_slug is present and user is personal trainer, redirect to checkout
     if (planSlug && profile.role === 'personal') {
       console.log('💳 Redirecionando para checkout com plan:', planSlug);
-      return NextResponse.redirect(`${origin}/app/personal/plans?checkout=${encodeURIComponent(planSlug)}`);
+      // Ensure we redirect to plans page with checkout parameter
+      const redirectUrl = `${origin}/app/personal/plans?checkout=${encodeURIComponent(planSlug)}`;
+      console.log('🔗 Redirect URL:', redirectUrl);
+      return NextResponse.redirect(redirectUrl);
     }
 
     // If redirect_to is specified, use it

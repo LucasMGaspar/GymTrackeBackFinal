@@ -24,13 +24,13 @@ VALUES (
   TRUE
 ) ON CONFLICT (slug) DO NOTHING;
 
--- Pro Monthly Plan
+-- Pro Monthly Plan (R$ 1,00 for testing)
 INSERT INTO public.plans (slug, name, description, price_cents, currency, interval, trial_days, features, is_active)
 VALUES (
   'pro-monthly',
   'Pro Mensal',
   'Plano profissional mensal. Gerencie até 50 alunos com todas as funcionalidades.',
-  9900,
+  100,
   'BRL',
   'month',
   7,
@@ -118,4 +118,5 @@ VALUES (
 
 -- Verify plans were created
 SELECT slug, name, price_cents, interval, is_active FROM public.plans ORDER BY price_cents;
+
 
