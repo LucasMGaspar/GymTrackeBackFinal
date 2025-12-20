@@ -132,13 +132,38 @@ export async function POST(request: Request) {
       }
     }
 
-    // Generate invite link manually (more reliable than inviteUserByEmail)
-    // This gives us the link even if email sending fails
+    // First, try to send invite email automatically (this sends email with Supabase link)
+    // We do this BEFORE generating the link manually so the email goes out
+    let emailSent = false;
+    try {
+      const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
+        student.student_email,
+        {
+          redirectTo: `${request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`,
+          data: {
+            name: student.student_name,
+            invited_by: user.id,
+            student_id: student.id,
+          },
+        }
+      );
+      
+      if (!inviteError) {
+        emailSent = true;
+        console.log('✅ Email de convite enviado automaticamente pelo Supabase');
+      } else {
+        console.log('⚠️ Erro ao enviar email automaticamente:', inviteError.message);
+      }
+    } catch (emailErr) {
+      console.log('⚠️ Erro ao tentar enviar email:', emailErr);
+    }
+
+    // Generate invite link manually (as backup and to get the link for manual sending)
     const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
       type: 'invite',
       email: student.student_email,
       options: {
-        redirectTo: `${request.headers.get('origin')}/auth/callback`,
+        redirectTo: `${request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/auth/callback`,
         data: {
           name: student.student_name,
           invited_by: user.id,
@@ -209,43 +234,27 @@ export async function POST(request: Request) {
       );
     }
 
-    // Always prefer direct app links over Supabase links
+    // Always prefer direct app links over Supabase links for display
     const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const supabaseInviteLink = linkData?.properties?.action_link;
-
-    // For new invites, we'll use a direct link to login page
-    // The Supabase email will be sent automatically, but we provide a direct link too
-    // Students can click either link - both will work
+    
+    // Create direct link to app (user-friendly)
     const inviteLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}&invite=true`;
 
-    // Try to send email automatically (may fail silently)
-    try {
-      await supabaseAdmin.auth.admin.inviteUserByEmail(
-        student.student_email,
-        {
-          redirectTo: `${request.headers.get('origin')}/auth/callback`,
-          data: {
-            name: student.student_name,
-            invited_by: user.id,
-            student_id: student.id,
-          },
-        }
-      );
-      console.log('✅ Tentativa de envio automático de email realizada');
-    } catch (emailError) {
-      // Email sending may fail, but we still have the link
-      console.log('⚠️ Envio automático de email falhou (normal em desenvolvimento):', emailError);
-    }
-
     console.log('✅ Link de convite gerado para:', student.student_email);
+    console.log('📧 Email enviado automaticamente:', emailSent ? 'Sim' : 'Não');
 
     return NextResponse.json({ 
       success: true,
-      message: 'Link de convite gerado com sucesso',
+      message: emailSent 
+        ? 'Email de convite enviado automaticamente! O aluno receberá o link no email.' 
+        : 'Link de convite gerado. O email automático pode não ter sido enviado - copie o link abaixo para enviar manualmente.',
       inviteLink: inviteLink,
-      note: 'Copie o link abaixo e envie manualmente para o aluno, pois o envio automático de email pode não estar configurado.',
+      note: emailSent 
+        ? 'O aluno receberá o email automaticamente. Você também pode copiar o link abaixo para enviar por outro canal.'
+        : 'Copie o link abaixo e envie manualmente para o aluno.',
       studentEmail: student.student_email,
       studentName: student.student_name,
+      emailSent: emailSent,
     });
   } catch (error: any) {
     console.error('Invite student error:', error);
