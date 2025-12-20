@@ -1,16 +1,65 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import { Dumbbell, Mail, ArrowRight, Sparkles, Shield, Zap, CheckCircle2 } from 'lucide-react';
+import { Dumbbell, Mail, ArrowRight, Sparkles, Shield, Zap, CheckCircle2, Clock, AlertCircle } from 'lucide-react';
+
+// Traduz mensagens de erro do Supabase
+function translateError(error: string): string {
+  const errorMap: Record<string, string> = {
+    'For security purposes, you can only request this after': 'Por segurança, aguarde antes de solicitar um novo link.',
+    'Email rate limit exceeded': 'Limite de emails atingido. Aguarde alguns minutos.',
+    'Invalid email': 'Email inválido.',
+    'User not found': 'Usuário não encontrado.',
+    'Email not confirmed': 'Email não confirmado.',
+    'Invalid login credentials': 'Credenciais inválidas.',
+  };
+
+  for (const [key, value] of Object.entries(errorMap)) {
+    if (error.includes(key)) return value;
+  }
+  
+  return error;
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [message, setMessage] = useState<{ type: 'success' | 'error' | 'warning'; text: string } | null>(null);
+  const [cooldown, setCooldown] = useState(0);
+
+  // Cooldown timer
+  useEffect(() => {
+    if (cooldown > 0) {
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [cooldown]);
+
+  // Check for stored cooldown on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('loginCooldown');
+    if (stored) {
+      const remaining = Math.max(0, Math.floor((parseInt(stored) - Date.now()) / 1000));
+      if (remaining > 0) {
+        setCooldown(remaining);
+      } else {
+        localStorage.removeItem('loginCooldown');
+      }
+    }
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (cooldown > 0) {
+      setMessage({
+        type: 'warning',
+        text: `Aguarde ${cooldown} segundos antes de solicitar um novo link.`,
+      });
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
 
@@ -25,15 +74,29 @@ export default function LoginPage() {
 
       if (error) throw error;
 
+      // Set cooldown for 60 seconds
+      const cooldownEnd = Date.now() + 60000;
+      localStorage.setItem('loginCooldown', cooldownEnd.toString());
+      setCooldown(60);
+
       setMessage({
         type: 'success',
-        text: 'Link mágico enviado! Verifique seu email para acessar.',
+        text: 'Link mágico enviado! Verifique seu email (incluindo a pasta de spam).',
       });
-      setEmail('');
     } catch (error: any) {
+      const errorMessage = error.message || 'Erro ao enviar link mágico.';
+      
+      // Check if it's a rate limit error and extract seconds
+      const secondsMatch = errorMessage.match(/after (\d+) seconds/);
+      if (secondsMatch) {
+        const seconds = parseInt(secondsMatch[1]);
+        setCooldown(seconds);
+        localStorage.setItem('loginCooldown', (Date.now() + seconds * 1000).toString());
+      }
+
       setMessage({
         type: 'error',
-        text: error.message || 'Erro ao enviar link mágico.',
+        text: translateError(errorMessage),
       });
     } finally {
       setLoading(false);
@@ -45,6 +108,8 @@ export default function LoginPage() {
     { icon: Shield, text: 'Seguro e sem senha' },
     { icon: Sparkles, text: 'Experiência premium' },
   ];
+
+  const isDisabled = loading || cooldown > 0;
 
   return (
     <div className="min-h-screen mesh-gradient flex">
@@ -136,13 +201,18 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                disabled={loading}
+                disabled={isDisabled}
                 className="btn-primary w-full py-4 text-base"
               >
                 {loading ? (
                   <>
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     <span>Enviando...</span>
+                  </>
+                ) : cooldown > 0 ? (
+                  <>
+                    <Clock className="w-5 h-5" />
+                    <span>Aguarde {cooldown}s</span>
                   </>
                 ) : (
                   <>
@@ -158,11 +228,17 @@ export default function LoginPage() {
                 className={`mt-6 p-4 rounded-xl flex items-start gap-3 animate-slide-up ${
                   message.type === 'success'
                     ? 'bg-success-50 text-success-700 border border-success-200'
+                    : message.type === 'warning'
+                    ? 'bg-amber-50 text-amber-700 border border-amber-200'
                     : 'bg-red-50 text-red-700 border border-red-200'
                 }`}
               >
-                {message.type === 'success' && (
+                {message.type === 'success' ? (
                   <CheckCircle2 className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                ) : message.type === 'warning' ? (
+                  <Clock className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                ) : (
+                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
                 )}
                 <p className="text-sm font-medium">{message.text}</p>
               </div>
