@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { createClient as createAdminClient } from '@supabase/supabase-js';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 
 const InviteStudentSchema = z.object({
   studentId: z.string().uuid(),
@@ -9,6 +10,14 @@ const InviteStudentSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting (muito restritivo para convites)
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.auth.maxRequests,
+      RATE_LIMITS.auth.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     // Verify authentication
     const supabase = await createClient();
     const {

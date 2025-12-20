@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { isValidUUID, sanitizeContent } from '@/lib/security/sanitize';
+import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 
 const CreateCommentSchema = z.object({
   session_id: z.string().uuid(),
@@ -14,6 +16,14 @@ const DeleteCommentSchema = z.object({
 // GET: Fetch comments for a session
 export async function GET(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.read.maxRequests,
+      RATE_LIMITS.read.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const { searchParams } = new URL(request.url);
     const sessionId = searchParams.get('session_id');
@@ -21,6 +31,14 @@ export async function GET(request: Request) {
     if (!sessionId) {
       return NextResponse.json(
         { error: 'session_id is required' },
+        { status: 400 }
+      );
+    }
+
+    // Validar formato UUID
+    if (!isValidUUID(sessionId)) {
+      return NextResponse.json(
+        { error: 'Invalid session_id format' },
         { status: 400 }
       );
     }
@@ -60,6 +78,14 @@ export async function GET(request: Request) {
 // POST: Create a new comment
 export async function POST(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.write.maxRequests,
+      RATE_LIMITS.write.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const body = await request.json();
 
@@ -82,13 +108,16 @@ export async function POST(request: Request) {
 
     const { session_id, content } = result.data;
 
+    // Sanitizar conteúdo antes de inserir
+    const sanitizedContent = sanitizeContent(content.trim());
+
     // Insert comment
     const { data: comment, error } = await supabase
       .from('workout_comments')
       .insert({
         session_id,
         author_id: user.id,
-        content: content.trim(),
+        content: sanitizedContent,
       })
       .select(
         `
@@ -113,6 +142,14 @@ export async function POST(request: Request) {
 // DELETE: Delete a comment
 export async function DELETE(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.write.maxRequests,
+      RATE_LIMITS.write.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const body = await request.json();
 

@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 
 const TemplateExerciseSchema = z.object({
   exercise_id: z.string().uuid(),
@@ -32,6 +33,14 @@ const DeleteTemplateSchema = z.object({
 // POST - Create template
 export async function POST(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.write.maxRequests,
+      RATE_LIMITS.write.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -114,6 +123,14 @@ export async function POST(request: Request) {
 // PUT - Update template
 export async function PUT(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.write.maxRequests,
+      RATE_LIMITS.write.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -189,6 +206,14 @@ export async function PUT(request: Request) {
 // DELETE - Delete template
 export async function DELETE(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.write.maxRequests,
+      RATE_LIMITS.write.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const {
       data: { user },

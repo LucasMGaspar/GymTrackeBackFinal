@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 
 const CreateExerciseSchema = z.object({
   personal_id: z.string().uuid(),
@@ -21,8 +22,16 @@ const DeleteExerciseSchema = z.object({
 });
 
 // GET - List exercises (optional, for API usage)
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.read.maxRequests,
+      RATE_LIMITS.read.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -53,6 +62,14 @@ export async function GET() {
 // POST - Create exercise
 export async function POST(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.write.maxRequests,
+      RATE_LIMITS.write.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -96,6 +113,14 @@ export async function POST(request: Request) {
 // PUT - Update exercise
 export async function PUT(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.write.maxRequests,
+      RATE_LIMITS.write.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const {
       data: { user },
@@ -146,6 +171,14 @@ export async function PUT(request: Request) {
 // DELETE - Delete exercise
 export async function DELETE(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.write.maxRequests,
+      RATE_LIMITS.write.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const {
       data: { user },

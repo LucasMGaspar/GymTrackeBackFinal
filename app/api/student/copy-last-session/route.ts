@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
+import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
 
 const CopyLastSessionSchema = z.object({
   sessionId: z.string().uuid(),
@@ -8,6 +9,14 @@ const CopyLastSessionSchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    // Rate limiting
+    const rateLimitResponse = rateLimit(
+      request as NextRequest,
+      RATE_LIMITS.write.maxRequests,
+      RATE_LIMITS.write.windowMs
+    );
+    if (rateLimitResponse) return rateLimitResponse;
+
     const supabase = await createClient();
     const {
       data: { user },

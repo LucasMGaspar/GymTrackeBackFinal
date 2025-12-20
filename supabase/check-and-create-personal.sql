@@ -102,3 +102,5 @@ JOIN auth.users u ON u.id = p.id
 WHERE p.role = 'personal';
 
 
+
+
