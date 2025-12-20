@@ -30,14 +30,20 @@ O Supabase permite usar um serviço de email profissional como **Resend** ou **S
    - Role até **SMTP Settings**
    - Ative **Enable Custom SMTP**
    - Configure:
-     ```
-     Host: smtp.resend.com
-     Port: 465 (ou 587)
-     Username: resend
-     Password: [SUA_API_KEY_DO_RESEND]
-     Sender email: noreply@[SEU_DOMINIO].com (ou onboarding@resend.dev para testes)
-     Sender name: FitCoach Pro
-     ```
+   ```
+   Host: smtp.resend.com
+   Port: 587  ⚠️ USE 587, não 465!
+   Username: resend
+   Password: [SUA_API_KEY_DO_RESEND]  ← Cole APENAS a API key (começa com re_...)
+   Sender email: onboarding@resend.dev (para testes)
+                 ou noreply@seu-dominio.com (produção, precisa verificar domínio)
+   Sender name: FitCoach Pro
+   ```
+   
+   **⚠️ IMPORTANTE:**
+   - Porta deve ser **587** (não 465)
+   - Password é APENAS a API key (não coloque "apikey:" ou prefixos)
+   - Para testes, use `onboarding@resend.dev`
 
 4. **Testar:**
    - Envie um convite de teste
