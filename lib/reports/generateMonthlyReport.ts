@@ -1,6 +1,17 @@
-import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+// Use dynamic imports to avoid build-time issues
 import type { Student, WorkoutSession, WorkoutSessionExercise } from '@/lib/types';
+
+// Lazy load jsPDF to avoid CSS file access during build
+let jsPDF: any;
+let autoTable: any;
+
+async function loadJsPDF() {
+  if (!jsPDF) {
+    jsPDF = (await import('jspdf')).default;
+    autoTable = (await import('jspdf-autotable')).default;
+  }
+  return { jsPDF, autoTable };
+}
 
 interface SessionWithExercises extends WorkoutSession {
   workout_session_exercises: (WorkoutSessionExercise & { exercise: any })[];
@@ -21,8 +32,9 @@ interface PersonalRecord {
   reps: string;
 }
 
-export function generateMonthlyReport(data: ReportData): jsPDF {
-  const doc = new jsPDF();
+export async function generateMonthlyReport(data: ReportData): Promise<any> {
+  const { jsPDF: jsPDFClass, autoTable: autoTableFn } = await loadJsPDF();
+  const doc = new jsPDFClass();
   const { student, personalName, sessions, periodStart, periodEnd } = data;
 
   // Colors
@@ -221,7 +233,7 @@ export function generateMonthlyReport(data: ReportData): jsPDF {
     .slice(0, 10);
 
   if (personalRecords.length > 0) {
-    autoTable(doc, {
+    autoTableFn(doc, {
       startY: yPosition,
       head: [['Exercício', 'Carga Máxima', 'Reps', 'Data']],
       body: personalRecords.map(pr => [

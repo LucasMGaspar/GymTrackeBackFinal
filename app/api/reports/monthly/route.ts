@@ -1,7 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
 import { NextRequest, NextResponse } from 'next/server';
-import { generateMonthlyReport } from '@/lib/reports/generateMonthlyReport';
 import { rateLimit, RATE_LIMITS } from '@/lib/security/rate-limit';
+
+// Dynamic import to avoid build-time issues with jsPDF
+const generateMonthlyReport = async (data: any) => {
+  const { generateMonthlyReport: generate } = await import('@/lib/reports/generateMonthlyReport');
+  return generate(data);
+};
 
 export async function POST(request: Request) {
   try {
@@ -95,8 +100,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // Generate PDF
-    const pdf = generateMonthlyReport({
+    // Generate PDF (dynamic import to avoid build issues)
+    const pdf = await generateMonthlyReport({
       student,
       personalName: profile.name,
       sessions: sessions || [],
