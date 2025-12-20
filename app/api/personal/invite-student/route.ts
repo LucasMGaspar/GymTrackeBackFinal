@@ -92,36 +92,12 @@ export async function POST(request: Request) {
     // If user exists but is not confirmed, we can resend the confirmation
     if (existingUser) {
       if (existingUser.email_confirmed_at) {
-        // User is already registered and confirmed - generate magic link for login
-        try {
-          const { data: magicLinkData, error: magicLinkError } = await supabaseAdmin.auth.admin.generateLink({
-            type: 'magiclink',
-            email: student.student_email,
-            options: {
-              redirectTo: `${request.headers.get('origin')}/auth/callback`,
-            },
-          });
-
-          if (magicLinkData?.properties?.action_link) {
-            return NextResponse.json({
-              success: true,
-              message: 'Link de login gerado (usuário já cadastrado)',
-              inviteLink: magicLinkData.properties.action_link,
-              note: 'Este email já está cadastrado. Use este link para o aluno fazer login diretamente.',
-              studentEmail: student.student_email,
-              studentName: student.student_name,
-              isExistingUser: true,
-            });
-          }
-        } catch (magicErr) {
-          console.log('Could not generate magic link:', magicErr);
-        }
-
-        // Fallback: return login page link
-        const loginLink = `${request.headers.get('origin')}/login?email=${encodeURIComponent(student.student_email)}`;
+        // User is already registered and confirmed - use direct app link (not Supabase link)
+        const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        const loginLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}`;
         return NextResponse.json({
           success: true,
-          message: 'Link de login gerado',
+          message: 'Link de login gerado (usuário já cadastrado)',
           inviteLink: loginLink,
           note: 'Este email já está cadastrado. Envie este link para o aluno fazer login. Se não lembrar a senha, use "Esqueci minha senha" na página de login.',
           studentEmail: student.student_email,
@@ -186,34 +162,12 @@ export async function POST(request: Request) {
           errorCode === 422 ||
           errorCode === 400) {
         
-        // Check if it's because user already confirmed - generate magic link
+        // Check if it's because user already confirmed - use direct app link
+        const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+        
         if (existingUser?.email_confirmed_at) {
-          try {
-            const { data: magicLinkData } = await supabaseAdmin.auth.admin.generateLink({
-              type: 'magiclink',
-              email: student.student_email,
-              options: {
-                redirectTo: `${request.headers.get('origin')}/auth/callback`,
-              },
-            });
-
-            if (magicLinkData?.properties?.action_link) {
-              return NextResponse.json({
-                success: true,
-                message: 'Link de login gerado',
-                inviteLink: magicLinkData.properties.action_link,
-                note: 'Este email já está cadastrado. Use este link para o aluno fazer login.',
-                studentEmail: student.student_email,
-                studentName: student.student_name,
-                isExistingUser: true,
-              });
-            }
-          } catch (e) {
-            console.log('Could not generate magic link:', e);
-          }
-
-          // Fallback: return login page link
-          const loginLink = `${request.headers.get('origin')}/login?email=${encodeURIComponent(student.student_email)}`;
+          // User confirmed - use direct login link
+          const loginLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}`;
           return NextResponse.json({
             success: true,
             message: 'Link de login gerado',
@@ -225,38 +179,13 @@ export async function POST(request: Request) {
           });
         }
         
-        // Otherwise, it's a pending invite - try to get a recovery link or generate new one
-        try {
-          // Try recovery link first
-          const { data: recoveryLink } = await supabaseAdmin.auth.admin.generateLink({
-            type: 'recovery',
-            email: student.student_email,
-            options: {
-              redirectTo: `${request.headers.get('origin')}/auth/callback`,
-            },
-          });
-          
-          if (recoveryLink?.properties?.action_link) {
-            return NextResponse.json({
-              success: true,
-              message: 'Link gerado (convite pendente)',
-              inviteLink: recoveryLink.properties.action_link,
-              note: 'Já existe um convite pendente. Use este link para reenviar manualmente.',
-              studentEmail: student.student_email,
-              studentName: student.student_name,
-            });
-          }
-        } catch (e) {
-          console.log('Could not generate recovery link:', e);
-        }
-
-        // Last resort: return login page link
-        const loginLink = `${request.headers.get('origin')}/login?email=${encodeURIComponent(student.student_email)}`;
+        // Pending invite - use direct login link (student can request new invite there)
+        const loginLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}`;
         return NextResponse.json({
           success: true,
           message: 'Link gerado',
           inviteLink: loginLink,
-          note: 'Já existe um convite pendente. Envie este link para o aluno acessar a página de login.',
+          note: 'Já existe um convite pendente. Envie este link para o aluno acessar a página de login e solicitar um novo convite.',
           studentEmail: student.student_email,
           studentName: student.student_name,
         });
@@ -280,14 +209,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const inviteLink = linkData?.properties?.action_link;
+    // Always prefer direct app links over Supabase links
+    const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const supabaseInviteLink = linkData?.properties?.action_link;
 
-    if (!inviteLink) {
-      return NextResponse.json(
-        { error: 'Erro ao gerar link de convite. Link não foi retornado.' },
-        { status: 500 }
-      );
-    }
+    // For new invites, we'll use a direct link to login page
+    // The Supabase email will be sent automatically, but we provide a direct link too
+    // Students can click either link - both will work
+    const inviteLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}&invite=true`;
 
     // Try to send email automatically (may fail silently)
     try {
