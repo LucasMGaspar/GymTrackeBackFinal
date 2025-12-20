@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { StreakDisplay } from '@/components/StreakDisplay';
 import { AchievementsBadges } from '@/components/AchievementsBadges';
 import { ProgressCharts } from '@/components/ProgressCharts';
-import type { WorkoutSession, WorkoutSessionExercise, Exercise } from '@/lib/types';
+import { GoalCard } from '@/components/GoalCard';
+import type { WorkoutSession, WorkoutSessionExercise, Exercise, Goal } from '@/lib/types';
 
 interface SessionWithExercises extends WorkoutSession {
   workout_session_exercises: (WorkoutSessionExercise & { exercise: Exercise })[];
@@ -19,6 +20,7 @@ interface Props {
   lastWorkoutDate: string | null;
   totalWorkoutsCompleted: number;
   sessions: SessionWithExercises[];
+  goals?: Goal[];
 }
 
 interface PersonalRecord {
@@ -35,7 +37,8 @@ export function DashboardClient({
   longestStreak,
   lastWorkoutDate,
   totalWorkoutsCompleted,
-  sessions 
+  sessions,
+  goals = []
 }: Props) {
   const metrics = useMemo(() => {
     const now = new Date();

@@ -108,6 +108,7 @@ export default async function StudentDashboardPage() {
         lastWorkoutDate={null}
         totalWorkoutsCompleted={0}
         sessions={[]}
+        goals={[]}
       />
     );
   }
@@ -131,6 +132,18 @@ export default async function StudentDashboardPage() {
     .gte('session_date', ninetyDaysAgo.toISOString().split('T')[0])
     .order('session_date', { ascending: false });
 
+  // Get active goals for dashboard
+  const { data: goals } = await supabase
+    .from('goals')
+    .select(`
+      *,
+      exercise:exercises(id, name, muscle_group)
+    `)
+    .eq('student_id', student.id)
+    .eq('status', 'active')
+    .order('progress_percentage', { ascending: false })
+    .limit(3);
+
   return (
     <DashboardClient
       studentName={profile.name}
@@ -140,6 +153,7 @@ export default async function StudentDashboardPage() {
       lastWorkoutDate={student.last_workout_date}
       totalWorkoutsCompleted={student.total_workouts_completed || 0}
       sessions={(sessions || []) as any[]}
+      goals={(goals || []) as any[]}
     />
   );
 }

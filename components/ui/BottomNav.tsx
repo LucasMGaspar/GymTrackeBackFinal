@@ -38,6 +38,15 @@ const studentNav: NavItem[] = [
       </svg>
     ),
   },
+  {
+    href: '/app/student/goals',
+    label: 'Metas',
+    icon: (active) => (
+      <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2.5 : 2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+  },
 ];
 
 export function BottomNav() {
@@ -45,7 +54,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 glass border-t border-gray-200/50 lg:hidden z-40 safe-area-bottom">
-      <div className="grid grid-cols-3 h-16">
+      <div className="grid grid-cols-4 h-16">
         {studentNav.map((item) => {
           const isActive = pathname === item.href;
           return (

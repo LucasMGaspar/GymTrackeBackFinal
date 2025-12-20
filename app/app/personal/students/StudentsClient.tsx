@@ -281,7 +281,7 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
               {/* Body */}
               <div className="p-5 space-y-4">
                 {/* Quick Links */}
-                <div className="grid grid-cols-5 gap-2">
+                <div className="grid grid-cols-6 gap-2">
                   <Link
                     href={`/app/personal/students/${student.id}/templates`}
                     className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-success-50 hover:bg-success-100 text-success-700 transition-colors"
@@ -317,6 +317,15 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
                       <path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     <span className="text-2xs font-semibold">Calendário</span>
+                  </Link>
+                  <Link
+                    href={`/app/personal/students/${student.id}/goals`}
+                    className="flex flex-col items-center gap-1.5 p-3 rounded-xl bg-primary-50 hover:bg-primary-100 text-primary-700 transition-colors"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-2xs font-semibold">Metas</span>
                   </Link>
                   <GenerateReportButton 
                     studentId={student.id}
