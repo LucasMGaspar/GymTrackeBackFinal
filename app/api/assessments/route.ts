@@ -205,54 +205,65 @@ export async function POST(request: NextRequest) {
     };
 
     // Add optional fields only if provided, with validation for NUMERIC(5,2) = max 999.99
-    if (data.weight !== undefined && data.weight !== null) {
-      if (data.weight > 999.99 || data.weight < 0) {
-        return NextResponse.json(
-          { error: 'Peso inválido', details: 'O peso deve estar entre 0 e 999.99 kg' },
-          { status: 400 }
-        );
+    // Helper function to validate and round numeric values
+    const validateAndRound = (value: number | null | undefined, max: number, fieldName: string): number | null => {
+      if (value === undefined || value === null) return null;
+      if (value > max || value < 0) {
+        throw new Error(`${fieldName} deve estar entre 0 e ${max}`);
       }
-      assessmentData.weight = Math.round(data.weight * 100) / 100; // Round to 2 decimals
-    }
-    if (data.height !== undefined && data.height !== null) {
-      if (data.height > 999.99 || data.height < 0) {
-        return NextResponse.json(
-          { error: 'Altura inválida', details: 'A altura deve estar entre 0 e 999.99 cm' },
-          { status: 400 }
-        );
+      return Math.round(value * 100) / 100; // Round to 2 decimals
+    };
+
+    try {
+      if (data.weight !== undefined && data.weight !== null) 
+        assessmentData.weight = validateAndRound(data.weight, 999.99, 'Peso');
+      if (data.height !== undefined && data.height !== null) 
+        assessmentData.height = validateAndRound(data.height, 999.99, 'Altura');
+    // Helper function to validate and round numeric values
+    const validateAndRound = (value: number | null | undefined, max: number, fieldName: string): number | null => {
+      if (value === undefined || value === null) return null;
+      if (value > max || value < 0) {
+        throw new Error(`${fieldName} deve estar entre 0 e ${max}`);
       }
-      assessmentData.height = Math.round(data.height * 100) / 100; // Round to 2 decimals
-    }
+      return Math.round(value * 100) / 100; // Round to 2 decimals
+    };
+
     if (data.body_fat_percentage !== undefined && data.body_fat_percentage !== null) 
-      assessmentData.body_fat_percentage = data.body_fat_percentage;
+      assessmentData.body_fat_percentage = validateAndRound(data.body_fat_percentage, 100, '% Gordura Corporal');
     if (data.muscle_mass !== undefined && data.muscle_mass !== null) 
-      assessmentData.muscle_mass = data.muscle_mass;
+      assessmentData.muscle_mass = validateAndRound(data.muscle_mass, 999.99, 'Massa Muscular');
     if (data.body_water_percentage !== undefined && data.body_water_percentage !== null) 
-      assessmentData.body_water_percentage = data.body_water_percentage;
+      assessmentData.body_water_percentage = validateAndRound(data.body_water_percentage, 100, '% Água Corporal');
     if (data.bone_mass !== undefined && data.bone_mass !== null) 
-      assessmentData.bone_mass = data.bone_mass;
+      assessmentData.bone_mass = validateAndRound(data.bone_mass, 999.99, 'Massa Óssea');
     if (data.chest_circumference !== undefined && data.chest_circumference !== null) 
-      assessmentData.chest_circumference = data.chest_circumference;
+      assessmentData.chest_circumference = validateAndRound(data.chest_circumference, 999.99, 'Circunferência do Peito');
     if (data.waist_circumference !== undefined && data.waist_circumference !== null) 
-      assessmentData.waist_circumference = data.waist_circumference;
+      assessmentData.waist_circumference = validateAndRound(data.waist_circumference, 999.99, 'Circunferência da Cintura');
     if (data.hip_circumference !== undefined && data.hip_circumference !== null) 
-      assessmentData.hip_circumference = data.hip_circumference;
+      assessmentData.hip_circumference = validateAndRound(data.hip_circumference, 999.99, 'Circunferência do Quadril');
     if (data.arm_circumference !== undefined && data.arm_circumference !== null) 
-      assessmentData.arm_circumference = data.arm_circumference;
+      assessmentData.arm_circumference = validateAndRound(data.arm_circumference, 999.99, 'Circunferência do Braço');
     if (data.thigh_circumference !== undefined && data.thigh_circumference !== null) 
-      assessmentData.thigh_circumference = data.thigh_circumference;
+      assessmentData.thigh_circumference = validateAndRound(data.thigh_circumference, 999.99, 'Circunferência da Coxa');
     if (data.calf_circumference !== undefined && data.calf_circumference !== null) 
-      assessmentData.calf_circumference = data.calf_circumference;
-    if (data.triceps_skinfold !== undefined && data.triceps_skinfold !== null) 
-      assessmentData.triceps_skinfold = data.triceps_skinfold;
-    if (data.biceps_skinfold !== undefined && data.biceps_skinfold !== null) 
-      assessmentData.biceps_skinfold = data.biceps_skinfold;
-    if (data.subscapular_skinfold !== undefined && data.subscapular_skinfold !== null) 
-      assessmentData.subscapular_skinfold = data.subscapular_skinfold;
-    if (data.iliac_skinfold !== undefined && data.iliac_skinfold !== null) 
-      assessmentData.iliac_skinfold = data.iliac_skinfold;
-    if (data.notes !== undefined && data.notes !== null) 
-      assessmentData.notes = data.notes.trim();
+      assessmentData.calf_circumference = validateAndRound(data.calf_circumference, 999.99, 'Circunferência da Panturrilha');
+      if (data.triceps_skinfold !== undefined && data.triceps_skinfold !== null) 
+        assessmentData.triceps_skinfold = validateAndRound(data.triceps_skinfold, 999.99, 'Dobra Cutânea do Tríceps');
+      if (data.biceps_skinfold !== undefined && data.biceps_skinfold !== null) 
+        assessmentData.biceps_skinfold = validateAndRound(data.biceps_skinfold, 999.99, 'Dobra Cutânea do Bíceps');
+      if (data.subscapular_skinfold !== undefined && data.subscapular_skinfold !== null) 
+        assessmentData.subscapular_skinfold = validateAndRound(data.subscapular_skinfold, 999.99, 'Dobra Cutânea Subescapular');
+      if (data.iliac_skinfold !== undefined && data.iliac_skinfold !== null) 
+        assessmentData.iliac_skinfold = validateAndRound(data.iliac_skinfold, 999.99, 'Dobra Cutânea Ilíaca');
+      if (data.notes !== undefined && data.notes !== null) 
+        assessmentData.notes = data.notes.trim();
+    } catch (validationError: any) {
+      return NextResponse.json(
+        { error: 'Validação falhou', details: validationError.message },
+        { status: 400 }
+      );
+    }
 
     const { data: assessment, error } = await supabase
       .from('physical_assessments')
