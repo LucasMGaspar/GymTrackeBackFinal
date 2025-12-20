@@ -43,20 +43,6 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
   const { showToast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
 
-  // Auto-trigger checkout if plan_slug is in URL (from login redirect)
-  useEffect(() => {
-    const checkoutPlan = searchParams.get('checkout');
-    if (checkoutPlan && plans.length > 0) {
-      const plan = plans.find(p => p.slug === checkoutPlan);
-      if (plan && !currentSubscription) {
-        // Small delay to ensure page is loaded
-        setTimeout(() => {
-          handleSubscribe(plan.slug);
-        }, 500);
-      }
-    }
-  }, [searchParams, plans, currentSubscription, handleSubscribe]);
-
   const formatPrice = (cents: number, currency: string) => {
     const value = cents / 100;
     return new Intl.NumberFormat('pt-BR', {
@@ -92,6 +78,20 @@ export function PlansClient({ plans, currentSubscription, userEmail }: Props) {
       setLoading(null);
     }
   }, [showToast]);
+
+  // Auto-trigger checkout if plan_slug is in URL (from login redirect)
+  useEffect(() => {
+    const checkoutPlan = searchParams.get('checkout');
+    if (checkoutPlan && plans.length > 0) {
+      const plan = plans.find(p => p.slug === checkoutPlan);
+      if (plan && !currentSubscription) {
+        // Small delay to ensure page is loaded
+        setTimeout(() => {
+          handleSubscribe(plan.slug);
+        }, 500);
+      }
+    }
+  }, [searchParams, plans, currentSubscription, handleSubscribe]);
 
   const isCurrentPlan = (planId: string) => {
     return currentSubscription?.plan_id === planId && 
