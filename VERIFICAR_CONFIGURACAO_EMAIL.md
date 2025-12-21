@@ -108,8 +108,24 @@ Após configurar SMTP:
 
 ## 📝 Notas
 
-- **Plano Gratuito Supabase**: Limite de 4 emails/hora
+- **Plano Gratuito Supabase**: 
+  - 4 emails/hora (sem SMTP customizado)
+  - **30 emails/hora** (com SMTP customizado habilitado)
+  - **Minimum interval per user:** 60 segundos (1 email por minuto por usuário)
 - **Resend Gratuito**: 3.000 emails/mês
 - **Emails do Supabase**: Podem ir para spam se não tiver SMTP configurado
 - **Domínio verificado**: Melhora deliverability (opcional no início)
+
+## ⚠️ Problema Comum: Só Consegue Enviar 1 Email
+
+Se você só consegue enviar para 1 email, pode ser:
+
+1. **Rate limiting do Supabase**: Aguarde 60 segundos entre envios
+2. **Minimum interval per user**: Configurado para 60 segundos (padrão)
+3. **Limite de 30 emails/hora**: Com SMTP customizado
+
+**Solução:**
+- Aguarde **60 segundos** entre cada envio
+- Ou envie em lotes pequenos (5-10 emails, aguarde 2 minutos, repita)
+- Verifique logs em **Logs → Auth Logs** para erros de rate limit
 
