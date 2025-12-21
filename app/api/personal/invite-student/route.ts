@@ -267,14 +267,24 @@ export async function POST(request: Request) {
     // The linkData.properties.action_link contains the full Supabase URL with token
     let inviteLink: string;
     
+    // Debug: log linkData structure
+    console.log('🔍 linkData structure:', JSON.stringify({
+      hasProperties: !!linkData?.properties,
+      hasActionLink: !!linkData?.properties?.action_link,
+      actionLink: linkData?.properties?.action_link?.substring(0, 100) + '...',
+    }));
+    
     if (linkData?.properties?.action_link) {
       // Extract token and type from Supabase URL
       // Format: https://project.supabase.co/auth/v1/verify?token=XXX&type=invite&...
       try {
-        const supabaseUrl = new URL(linkData.properties.action_link);
+        const actionLink = linkData.properties.action_link;
+        const supabaseUrl = new URL(actionLink);
         const token = supabaseUrl.searchParams.get('token');
         const type = supabaseUrl.searchParams.get('type') || 'invite';
         const hash = supabaseUrl.searchParams.get('hash'); // Some links use hash instead of token
+        
+        console.log('🔍 Extracted from URL:', { token: token ? 'present' : 'missing', type, hash: hash ? 'present' : 'missing' });
         
         if (token || hash) {
           // Use token or hash for direct invite link that works without email
@@ -283,18 +293,26 @@ export async function POST(request: Request) {
           console.log('✅ Link direto com token gerado para:', student.student_email);
         } else {
           // If we can't extract token, use the full Supabase link (it still works!)
-          inviteLink = linkData.properties.action_link;
+          inviteLink = actionLink;
           console.log('⚠️ Token não encontrado, usando link completo do Supabase');
         }
       } catch (urlError) {
-        console.error('Erro ao extrair token do link:', urlError);
-        // Fallback to Supabase link if available
+        console.error('❌ Erro ao extrair token do link:', urlError);
+        // Fallback to Supabase link if available (it still works, just goes through Supabase first)
         inviteLink = linkData.properties.action_link || `${origin}/login?email=${encodeURIComponent(student.student_email)}&invite=true`;
       }
     } else {
-      // Fallback to login page if action_link not available
-      inviteLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}&invite=true`;
-      console.log('⚠️ action_link não disponível, usando link de login');
+      // Fallback: if action_link not available, try to use the full Supabase link from linkData
+      // Some Supabase versions return the link directly in linkData
+      const fallbackLink = (linkData as any)?.action_link || (linkData as any)?.properties?.redirect_to;
+      if (fallbackLink) {
+        inviteLink = fallbackLink;
+        console.log('⚠️ Usando link alternativo do linkData');
+      } else {
+        // Final fallback to login page (requires email)
+        inviteLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}&invite=true`;
+        console.log('⚠️ action_link não disponível, usando link de login (aluno precisará receber email)');
+      }
     }
 
     console.log('✅ Link de convite gerado para:', student.student_email);
