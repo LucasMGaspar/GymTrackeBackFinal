@@ -263,8 +263,43 @@ export async function POST(request: Request) {
     // Always prefer direct app links over Supabase links for display
     const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     
-    // Create direct link to app (user-friendly)
-    const inviteLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}&invite=true`;
+    // Extract token from Supabase link to create direct invite link
+    // The linkData.properties.action_link contains the full Supabase URL with token
+    let inviteLink: string;
+    
+    if (linkData?.properties?.action_link) {
+      // Extract token and type from Supabase URL
+      // Format: https://project.supabase.co/auth/v1/verify?token=XXX&type=invite&...
+      try {
+        const supabaseUrl = new URL(linkData.properties.action_link);
+        const token = supabaseUrl.searchParams.get('token');
+        const type = supabaseUrl.searchParams.get('type') || 'invite';
+        const hash = supabaseUrl.searchParams.get('hash'); // Some links use hash instead of token
+        
+        if (token || hash) {
+          // Use token or hash for direct invite link that works without email
+          const tokenOrHash = token || hash;
+          inviteLink = `${origin}/auth/accept-invite?token=${encodeURIComponent(tokenOrHash!)}&type=${encodeURIComponent(type)}&email=${encodeURIComponent(student.student_email)}`;
+          console.log('✅ Link direto com token gerado para:', student.student_email);
+        } else {
+          // If we can't extract token, use the full Supabase link (it still works!)
+          inviteLink = linkData.properties.action_link;
+          console.log('⚠️ Token não encontrado, usando link completo do Supabase');
+        }
+      } catch (urlError) {
+        console.error('Erro ao extrair token do link:', urlError);
+        // Fallback to Supabase link if available
+        inviteLink = linkData.properties.action_link || `${origin}/login?email=${encodeURIComponent(student.student_email)}&invite=true`;
+      }
+    } else if (linkData?.action_link) {
+      // Alternative property name
+      inviteLink = linkData.action_link;
+      console.log('✅ Usando action_link do linkData');
+    } else {
+      // Fallback to login page if action_link not available
+      inviteLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}&invite=true`;
+      console.log('⚠️ action_link não disponível, usando link de login');
+    }
 
     console.log('✅ Link de convite gerado para:', student.student_email);
     console.log('📧 Email enviado automaticamente:', emailSent ? 'Sim' : 'Não');
