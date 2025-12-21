@@ -135,6 +135,7 @@ export async function POST(request: Request) {
     // First, try to send invite email automatically (this sends email with Supabase link)
     // We do this BEFORE generating the link manually so the email goes out
     let emailSent = false;
+    let emailErrorDetails: any = null;
     try {
       const { data: inviteData, error: inviteError } = await supabaseAdmin.auth.admin.inviteUserByEmail(
         student.student_email,
@@ -150,12 +151,25 @@ export async function POST(request: Request) {
       
       if (!inviteError) {
         emailSent = true;
-        console.log('✅ Email de convite enviado automaticamente pelo Supabase');
+        console.log('✅ Email de convite enviado automaticamente pelo Supabase para:', student.student_email);
       } else {
-        console.log('⚠️ Erro ao enviar email automaticamente:', inviteError.message);
+        emailErrorDetails = {
+          message: inviteError.message,
+          status: inviteError.status,
+          code: inviteError.code,
+          name: inviteError.name,
+        };
+        console.error('❌ Erro ao enviar email automaticamente para:', student.student_email, inviteError);
       }
-    } catch (emailErr) {
-      console.log('⚠️ Erro ao tentar enviar email:', emailErr);
+    } catch (emailErr: any) {
+      emailErrorDetails = {
+        message: emailErr?.message || 'Erro desconhecido ao enviar email',
+        status: emailErr?.status,
+        code: emailErr?.code,
+        name: emailErr?.name,
+        stack: emailErr?.stack,
+      };
+      console.error('❌ Exceção ao tentar enviar email para:', student.student_email, emailErr);
     }
 
     // Generate invite link manually (as backup and to get the link for manual sending)
@@ -173,7 +187,7 @@ export async function POST(request: Request) {
     });
 
     if (linkError) {
-      console.error('Generate link error:', linkError);
+      console.error('❌ Generate link error para:', student.student_email, linkError);
       
       // Check for common error cases
       const errorMessage = linkError.message?.toLowerCase() || '';
@@ -218,7 +232,11 @@ export async function POST(request: Request) {
       
       if (errorMessage.includes('invalid email') || errorMessage.includes('email format')) {
         return NextResponse.json(
-          { error: 'Email inválido. Verifique o email do aluno.' },
+          { 
+            error: 'Email inválido. Verifique o email do aluno.',
+            email: student.student_email,
+            details: linkError.message,
+          },
           { status: 400 }
         );
       }
@@ -227,8 +245,16 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { 
           error: 'Erro ao gerar link de convite',
+          email: student.student_email,
           details: linkError.message || 'Erro desconhecido',
-          code: errorCode
+          code: errorCode,
+          linkError: {
+            message: linkError.message,
+            status: linkError.status,
+            code: linkError.code,
+            name: linkError.name,
+          },
+          emailError: emailErrorDetails, // Include email sending error if any
         },
         { status: 400 }
       );
@@ -242,19 +268,25 @@ export async function POST(request: Request) {
 
     console.log('✅ Link de convite gerado para:', student.student_email);
     console.log('📧 Email enviado automaticamente:', emailSent ? 'Sim' : 'Não');
+    if (emailErrorDetails) {
+      console.log('⚠️ Erro ao enviar email (mas link gerado):', emailErrorDetails);
+    }
 
     return NextResponse.json({ 
       success: true,
       message: emailSent 
         ? 'Email de convite enviado automaticamente! O aluno receberá o link no email.' 
-        : 'Link de convite gerado. O email automático pode não ter sido enviado - copie o link abaixo para enviar manualmente.',
+        : 'Link de convite gerado. O email automático não foi enviado - copie o link abaixo para enviar manualmente.',
       inviteLink: inviteLink,
       note: emailSent 
         ? 'O aluno receberá o email automaticamente. Você também pode copiar o link abaixo para enviar por outro canal.'
-        : 'Copie o link abaixo e envie manualmente para o aluno.',
+        : emailErrorDetails 
+          ? `O email não foi enviado automaticamente: ${emailErrorDetails.message || 'Erro desconhecido'}. Copie o link abaixo e envie manualmente.`
+          : 'Copie o link abaixo e envie manualmente para o aluno.',
       studentEmail: student.student_email,
       studentName: student.student_name,
       emailSent: emailSent,
+      emailError: emailErrorDetails || undefined, // Include error details if email failed
     });
   } catch (error: any) {
     console.error('Invite student error:', error);

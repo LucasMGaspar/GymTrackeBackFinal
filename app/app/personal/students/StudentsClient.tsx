@@ -129,13 +129,35 @@ export function StudentsClient({ initialStudents, personalId }: Props) {
         
         if (data.isExistingUser) {
           showToast('Link de login gerado! Copie e envie para o aluno 📋', 'success');
+        } else if (data.emailError) {
+          // Show warning if email failed but link was generated
+          showToast(`Link gerado, mas email não enviado: ${data.emailError.message || 'Erro desconhecido'} ⚠️`, 'warning');
         } else {
           showToast('Link de convite gerado! Copie e envie para o aluno 📋', 'success');
         }
       } else if (!response.ok) {
         // Only show error if we don't have a link
-        const errorMessage = data.error || 'Erro ao gerar link';
+        let errorMessage = data.error || 'Erro ao gerar link';
+        
+        // Add more details if available
+        if (data.details) {
+          errorMessage += `: ${data.details}`;
+        }
+        
+        if (data.email) {
+          errorMessage += ` (Email: ${data.email})`;
+        }
+        
+        if (data.linkError) {
+          errorMessage += ` - ${data.linkError.message || ''}`;
+        }
+        
+        if (data.emailError) {
+          errorMessage += ` - Email: ${data.emailError.message || ''}`;
+        }
+        
         showToast(errorMessage, 'error');
+        console.error('Erro completo:', data);
       } else {
         showToast(`Convite enviado para ${student.student_email}! 📧`, 'success');
       }
