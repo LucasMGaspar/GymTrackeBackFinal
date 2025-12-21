@@ -92,74 +92,7 @@ export async function POST(request: Request) {
     // If user exists but is not confirmed, we can resend the confirmation
     if (existingUser) {
       if (existingUser.email_confirmed_at) {
-        // User is already registered and confirmed - generate magic link instead of invite
-        // This creates a link that works without needing email delivery
-        console.log('✅ Usuário já confirmado, gerando magic link para:', student.student_email);
-        
-        try {
-          const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-          const { data: magicLinkData, error: magicLinkError } = await supabaseAdmin.auth.admin.generateLink({
-            type: 'magiclink',
-            email: student.student_email,
-            options: {
-              redirectTo: `${origin}/auth/callback`,
-            },
-          });
-
-          if (!magicLinkError && magicLinkData?.properties?.action_link) {
-            // Extract token from magic link to create direct link
-            try {
-              const actionLink = magicLinkData.properties.action_link;
-              const supabaseUrl = new URL(actionLink);
-              const token = supabaseUrl.searchParams.get('token');
-              const hash = supabaseUrl.searchParams.get('hash');
-              const type = supabaseUrl.searchParams.get('type') || 'magiclink';
-              
-              if (token || hash) {
-                const tokenOrHash = token || hash;
-                const loginLink = `${origin}/auth/accept-invite?token=${encodeURIComponent(tokenOrHash!)}&type=${encodeURIComponent(type)}&email=${encodeURIComponent(student.student_email)}`;
-                
-                return NextResponse.json({
-                  success: true,
-                  message: 'Link de login gerado (usuário já cadastrado)',
-                  inviteLink: loginLink,
-                  note: 'Este email já está cadastrado. Este link faz login automático - envie para o aluno.',
-                  studentEmail: student.student_email,
-                  studentName: student.student_name,
-                  isExistingUser: true,
-                });
-              } else {
-                // Fallback to Supabase link
-                return NextResponse.json({
-                  success: true,
-                  message: 'Link de login gerado (usuário já cadastrado)',
-                  inviteLink: actionLink,
-                  note: 'Este email já está cadastrado. Este link faz login automático - envie para o aluno.',
-                  studentEmail: student.student_email,
-                  studentName: student.student_name,
-                  isExistingUser: true,
-                });
-              }
-            } catch (urlError) {
-              console.error('Erro ao extrair token do magic link:', urlError);
-              // Use the link as-is
-              return NextResponse.json({
-                success: true,
-                message: 'Link de login gerado (usuário já cadastrado)',
-                inviteLink: magicLinkData.properties.action_link,
-                note: 'Este email já está cadastrado. Este link faz login automático - envie para o aluno.',
-                studentEmail: student.student_email,
-                studentName: student.student_name,
-                isExistingUser: true,
-              });
-            }
-          }
-        } catch (magicLinkErr) {
-          console.error('Erro ao gerar magic link:', magicLinkErr);
-          // Fall through to normal flow
-        }
-        
-        // Fallback: use simple login link if magic link generation fails
+        // User is already registered and confirmed - use direct app link (not Supabase link)
         const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
         const loginLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}`;
         return NextResponse.json({
@@ -330,53 +263,8 @@ export async function POST(request: Request) {
     // Always prefer direct app links over Supabase links for display
     const origin = request.headers.get('origin') || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
     
-    // Extract token from Supabase link to create direct invite link
-    // The linkData.properties.action_link contains the full Supabase URL with token
-    let inviteLink: string;
-    
-    // Debug: log full linkData structure to understand what Supabase returns
-    console.log('🔍 linkData completo:', JSON.stringify(linkData, null, 2));
-    console.log('🔍 linkData.properties:', linkData?.properties);
-    console.log('🔍 linkData.properties.action_link:', linkData?.properties?.action_link);
-    
-    // Try multiple ways to get the action link
-    const actionLink = linkData?.properties?.action_link 
-      || (linkData as any)?.action_link 
-      || (linkData as any)?.properties?.redirect_to
-      || (linkData as any)?.properties?.hashed_token;
-    
-    if (actionLink && typeof actionLink === 'string' && actionLink.startsWith('http')) {
-      // We have a full URL from Supabase
-      try {
-        // Try to extract token/hash from the URL
-        const supabaseUrl = new URL(actionLink);
-        const token = supabaseUrl.searchParams.get('token');
-        const hash = supabaseUrl.searchParams.get('hash');
-        const type = supabaseUrl.searchParams.get('type') || 'invite';
-        
-        console.log('🔍 Extracted from URL:', { token: token ? 'present' : 'missing', hash: hash ? 'present' : 'missing', type });
-        
-        if (token || hash) {
-          // Use token or hash for direct invite link that works without email
-          const tokenOrHash = token || hash;
-          inviteLink = `${origin}/auth/accept-invite?token=${encodeURIComponent(tokenOrHash!)}&type=${encodeURIComponent(type)}&email=${encodeURIComponent(student.student_email)}`;
-          console.log('✅ Link direto com token gerado para:', student.student_email);
-        } else {
-          // Use the full Supabase link directly (it works, just redirects through Supabase first)
-          inviteLink = actionLink;
-          console.log('✅ Usando link completo do Supabase (funciona, mas passa pelo Supabase primeiro)');
-        }
-      } catch (urlError) {
-        console.error('❌ Erro ao processar URL:', urlError);
-        // Use the link as-is if we can't parse it
-        inviteLink = actionLink;
-        console.log('✅ Usando link do Supabase como está');
-      }
-    } else {
-      // No action link found - use fallback to login page
-      inviteLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}&invite=true`;
-      console.log('⚠️ Nenhum link do Supabase encontrado, usando fallback para login (aluno precisará receber email)');
-    }
+    // Create direct link to app (user-friendly)
+    const inviteLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}&invite=true`;
 
     console.log('✅ Link de convite gerado para:', student.student_email);
     console.log('📧 Email enviado automaticamente:', emailSent ? 'Sim' : 'Não');
