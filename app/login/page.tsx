@@ -10,11 +10,26 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
 
-  // Check for error in URL params (from callback redirect)
+  // Check for token in URL params and process it automatically
   useEffect(() => {
+    const token = searchParams.get('token');
+    const type = searchParams.get('type');
+    const email = searchParams.get('email');
     const error = searchParams.get('error');
+    
     if (error) {
       setMessage(`❌ ${decodeURIComponent(error)}`);
+      return;
+    }
+    
+    // If we have token and type, process the login automatically
+    if (token && type && email) {
+      setLoading(true);
+      setEmail(email);
+      
+      // Redirect to accept-invite route which will handle the token
+      const acceptInviteUrl = `/auth/accept-invite?token=${encodeURIComponent(token)}&type=${encodeURIComponent(type)}&email=${encodeURIComponent(email)}`;
+      window.location.href = acceptInviteUrl;
     }
   }, [searchParams]);
 
