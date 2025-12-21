@@ -291,10 +291,6 @@ export async function POST(request: Request) {
         // Fallback to Supabase link if available
         inviteLink = linkData.properties.action_link || `${origin}/login?email=${encodeURIComponent(student.student_email)}&invite=true`;
       }
-    } else if (linkData?.action_link) {
-      // Alternative property name
-      inviteLink = linkData.action_link;
-      console.log('✅ Usando action_link do linkData');
     } else {
       // Fallback to login page if action_link not available
       inviteLink = `${origin}/login?email=${encodeURIComponent(student.student_email)}&invite=true`;
